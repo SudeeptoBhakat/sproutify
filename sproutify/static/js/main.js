@@ -106,3 +106,46 @@ window.addEventListener("load", () => {
     preloader.style.display = "none";
   }, 500);
 });
+
+
+// ===========================
+//  Login Popup Shows
+// ===========================
+document.addEventListener("DOMContentLoaded", function () {
+  const loginPopup = document.getElementById("loginPopup");
+  const registerPopup = document.getElementById("registerPopup");
+
+  const loginBtn = document.getElementById("loginBtn");
+  const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+  const registerCloseBtn = document.getElementById("registerCloseBtn");
+  const showRegisterBtn = document.getElementById("showRegisterBtn");
+  const showLoginBtn = document.getElementById("showLoginBtn");
+
+  // Show Login
+  loginBtn?.addEventListener("click", () => {
+    loginPopup.classList.remove("hidden");
+  });
+
+  // Close Login
+  loginCloseBtn?.addEventListener("click", () => {
+    loginPopup.classList.add("hidden");
+  });
+
+  // Show Register from Login
+  showRegisterBtn?.addEventListener("click", () => {
+    loginPopup.classList.add("hidden");
+    registerPopup.classList.remove("hidden");
+  });
+
+  // Show Login from Register
+  showLoginBtn?.addEventListener("click", () => {
+    registerPopup.classList.add("hidden");
+    loginPopup.classList.remove("hidden");
+  });
+
+  // Close Register
+  registerCloseBtn?.addEventListener("click", () => {
+    registerPopup.classList.add("hidden");
+  });
+});

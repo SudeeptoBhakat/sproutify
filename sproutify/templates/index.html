@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,12 +11,15 @@
 
     <!-- SEO Meta -->
     <meta name="title" content="Sproutify – Organic Plant Nursery & Indoor Greenery Decor">
-    <meta name="description" content="Sproutify offers premium organic plants, stylish indoor greenery, and eco-friendly decor solutions. Transform your space with nature's elegance.">
-    <meta name="keywords" content="Sproutify, organic plants, indoor plants, plant nursery, eco-friendly decor, plant shop, sustainable gardening, greenery, plant delivery, home garden">
+    <meta name="description"
+        content="Sproutify offers premium organic plants, stylish indoor greenery, and eco-friendly decor solutions. Transform your space with nature's elegance.">
+    <meta name="keywords"
+        content="Sproutify, organic plants, indoor plants, plant nursery, eco-friendly decor, plant shop, sustainable gardening, greenery, plant delivery, home garden">
 
     <!-- Social Meta for Sharing -->
     <meta property="og:title" content="Sproutify – Organic Plant Nursery & Indoor Greenery">
-    <meta property="og:description" content="Discover Sproutify’s collection of handpicked, organically-grown plants to beautify your indoor and outdoor spaces.">
+    <meta property="og:description"
+        content="Discover Sproutify’s collection of handpicked, organically-grown plants to beautify your indoor and outdoor spaces.">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card -->
@@ -26,59 +30,105 @@
     <title>Sproutify</title>
     <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 
 <body>
-    <!-- preloader -->
+    <!-- login model start -->
 
+    <!-- LOGIN POPUP -->
+    <div id="loginPopup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-btn" id="loginCloseBtn">&times;</span>
+            <h2>Login to Sproutify</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email or Phone</label>
+                    <input type="text" id="identifier" placeholder="Enter your email or phone" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required />
+                </div>
+                <button type="submit" class="btn-submit">Login</button>
+            </form>
+
+            <div>Don't have an account? <a href="#" id="showRegisterBtn">Register Now</a></div>
+        </div>
+    </div>
+
+    <!-- REGISTER POPUP -->
+    <div id="registerPopup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-btn" id="registerCloseBtn">&times;</span>
+            <h2>Register to Sproutify</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="Enter your first name" required />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required />
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="phone" placeholder="Enter your phone number" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required />
+                </div>
+                <button type="submit" class="btn-submit">Register</button>
+            </form>
+            <div>Already have an account? <a href="#" id="showLoginBtn">Login Now</a></div>
+        </div>
+    </div>
+
+
+    <!-- login model end -->
+
+    <!-- preloader -->
     <div id="preloader">
-<!-- From Uiverse.io by Novaxlo --> 
-<div class="earth">
-  <div class="earth-loader">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-      <path
-        transform="translate(100 100)"
-        d="M29.4,-17.4C33.1,1.8,27.6,16.1,11.5,31.6C-4.7,47,-31.5,63.6,-43,56C-54.5,48.4,-50.7,16.6,-41,-10.9C-31.3,-38.4,-15.6,-61.5,-1.4,-61C12.8,-60.5,25.7,-36.5,29.4,-17.4Z"
-        fill="#7CC133"
-      ></path>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-      <path
-        transform="translate(100 100)"
-        d="M31.7,-55.8C40.3,-50,45.9,-39.9,49.7,-29.8C53.5,-19.8,55.5,-9.9,53.1,-1.4C50.6,7.1,43.6,14.1,41.8,27.6C40.1,41.1,43.4,61.1,37.3,67C31.2,72.9,15.6,64.8,1.5,62.2C-12.5,59.5,-25,62.3,-31.8,56.7C-38.5,51.1,-39.4,37.2,-49.3,26.3C-59.1,15.5,-78,7.7,-77.6,0.2C-77.2,-7.2,-57.4,-14.5,-49.3,-28.4C-41.2,-42.4,-44.7,-63,-38.5,-70.1C-32.2,-77.2,-16.1,-70.8,-2.3,-66.9C11.6,-63,23.1,-61.5,31.7,-55.8Z"
-        fill="#7CC133"
-      ></path>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-      <path
-        transform="translate(100 100)"
-        d="M30.6,-49.2C42.5,-46.1,57.1,-43.7,67.6,-35.7C78.1,-27.6,84.6,-13.8,80.3,-2.4C76.1,8.9,61.2,17.8,52.5,29.1C43.8,40.3,41.4,53.9,33.7,64C26,74.1,13,80.6,2.2,76.9C-8.6,73.1,-17.3,59,-30.6,52.1C-43.9,45.3,-61.9,45.7,-74.1,38.2C-86.4,30.7,-92.9,15.4,-88.6,2.5C-84.4,-10.5,-69.4,-20.9,-60.7,-34.6C-52.1,-48.3,-49.8,-65.3,-40.7,-70C-31.6,-74.8,-15.8,-67.4,-3.2,-61.8C9.3,-56.1,18.6,-52.3,30.6,-49.2Z"
-        fill="#7CC133"
-      ></path>
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-      <path
-        transform="translate(100 100)"
-        d="M39.4,-66C48.6,-62.9,51.9,-47.4,52.9,-34.3C53.8,-21.3,52.4,-10.6,54.4,1.1C56.3,12.9,61.7,25.8,57.5,33.2C53.2,40.5,39.3,42.3,28.2,46C17,49.6,8.5,55.1,1.3,52.8C-5.9,50.5,-11.7,40.5,-23.6,37.2C-35.4,34,-53.3,37.5,-62,32.4C-70.7,27.4,-70.4,13.7,-72.4,-1.1C-74.3,-15.9,-78.6,-31.9,-73.3,-43C-68.1,-54.2,-53.3,-60.5,-39.5,-60.9C-25.7,-61.4,-12.9,-56,1.1,-58C15.1,-59.9,30.2,-69.2,39.4,-66Z"
-        fill="#7CC133"
-      ></path>
-    </svg>
-  </div>
-  <p>Connecting...</p>
-</div>
+        <!-- From Uiverse.io by Novaxlo -->
+        <div class="earth">
+            <div class="earth-loader">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <path transform="translate(100 100)"
+                        d="M29.4,-17.4C33.1,1.8,27.6,16.1,11.5,31.6C-4.7,47,-31.5,63.6,-43,56C-54.5,48.4,-50.7,16.6,-41,-10.9C-31.3,-38.4,-15.6,-61.5,-1.4,-61C12.8,-60.5,25.7,-36.5,29.4,-17.4Z"
+                        fill="#7CC133"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <path transform="translate(100 100)"
+                        d="M31.7,-55.8C40.3,-50,45.9,-39.9,49.7,-29.8C53.5,-19.8,55.5,-9.9,53.1,-1.4C50.6,7.1,43.6,14.1,41.8,27.6C40.1,41.1,43.4,61.1,37.3,67C31.2,72.9,15.6,64.8,1.5,62.2C-12.5,59.5,-25,62.3,-31.8,56.7C-38.5,51.1,-39.4,37.2,-49.3,26.3C-59.1,15.5,-78,7.7,-77.6,0.2C-77.2,-7.2,-57.4,-14.5,-49.3,-28.4C-41.2,-42.4,-44.7,-63,-38.5,-70.1C-32.2,-77.2,-16.1,-70.8,-2.3,-66.9C11.6,-63,23.1,-61.5,31.7,-55.8Z"
+                        fill="#7CC133"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <path transform="translate(100 100)"
+                        d="M30.6,-49.2C42.5,-46.1,57.1,-43.7,67.6,-35.7C78.1,-27.6,84.6,-13.8,80.3,-2.4C76.1,8.9,61.2,17.8,52.5,29.1C43.8,40.3,41.4,53.9,33.7,64C26,74.1,13,80.6,2.2,76.9C-8.6,73.1,-17.3,59,-30.6,52.1C-43.9,45.3,-61.9,45.7,-74.1,38.2C-86.4,30.7,-92.9,15.4,-88.6,2.5C-84.4,-10.5,-69.4,-20.9,-60.7,-34.6C-52.1,-48.3,-49.8,-65.3,-40.7,-70C-31.6,-74.8,-15.8,-67.4,-3.2,-61.8C9.3,-56.1,18.6,-52.3,30.6,-49.2Z"
+                        fill="#7CC133"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <path transform="translate(100 100)"
+                        d="M39.4,-66C48.6,-62.9,51.9,-47.4,52.9,-34.3C53.8,-21.3,52.4,-10.6,54.4,1.1C56.3,12.9,61.7,25.8,57.5,33.2C53.2,40.5,39.3,42.3,28.2,46C17,49.6,8.5,55.1,1.3,52.8C-5.9,50.5,-11.7,40.5,-23.6,37.2C-35.4,34,-53.3,37.5,-62,32.4C-70.7,27.4,-70.4,13.7,-72.4,-1.1C-74.3,-15.9,-78.6,-31.9,-73.3,-43C-68.1,-54.2,-53.3,-60.5,-39.5,-60.9C-25.7,-61.4,-12.9,-56,1.1,-58C15.1,-59.9,30.2,-69.2,39.4,-66Z"
+                        fill="#7CC133"></path>
+                </svg>
+            </div>
+            <p>Connecting...</p>
+        </div>
 
     </div>
     <!-- preloader end -->
     <!-- Whatsapp logo -->
     <a href="https://wa.me/9064266209" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
-        <img src="images/whatsapp-svgrepo-com.svg" alt="WhatsApp" />
+        <img src="{% static 'images/whatsapp-svgrepo-com.svg' %}" alt="WhatsApp" />
     </a>
 
     <!-- Whatsapp Logo end -->
     <!-- navbar -->
     <header>
         <figure class="logo">
-            <img src="images/logo1.0.png" alt="" style="padding-left: 10px;">
+            <img src="{% static 'images/logo1.0.png' %}" alt="" style="padding-left: 10px;">
         </figure>
         <input type="checkbox" id="menu-toggle" class="menu-toggle">
         <label for="menu-toggle" class="menu-icon">
@@ -105,9 +155,14 @@
                         <input class="input" placeholder="Search for Plant" required type="text">
                     </form>
                 </li>
-                <li><a href="#"><svg width="20" height="20" fill="currentColor">
-                            <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
-                        </svg> Account</a></li>
+
+                <li>
+                    <div id="userMenuContainer"><a herf="#" id="loginBtn" style="cursor: pointer;"><svg width="20"
+                                height="20" fill="currentColor">
+                                <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+                            </svg> Account</a></div>
+                </li>
+
                 <li><a href="#"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"
                             viewBox="0 0 52 52">
                             <g>
@@ -141,7 +196,7 @@
                         </div>
                     </div>
                     <figure class="image">
-                        <img src="images/1.png" alt="">
+                        <img src="{% static 'images/1.png' %}" alt="">
                         <figcaption>Snake Plant (Sansevieria trifasciata)</figcaption>
                     </figure>
                 </article>
@@ -161,7 +216,7 @@
                         </div>
                     </div>
                     <figure class="image">
-                        <img src="images/2.png" alt="">
+                        <img src="{% static 'images/2.png' %}" alt="">
                         <figcaption>Ficus Ginseng Bonsai</figcaption>
                     </figure>
                 </article>
@@ -181,7 +236,7 @@
                         </div>
                     </div>
                     <figure class="image">
-                        <img src="images/3.png" alt="">
+                        <img src="{% static 'images/3.png' %}" alt="">
                         <figcaption>Succulent Delight (Crassula Var.)</figcaption>
                     </figure>
                 </article>
@@ -202,7 +257,7 @@
                         </div>
                     </div>
                     <figure class="image">
-                        <img src="images/4.png" alt="">
+                        <img src="{% static 'images/4.png' %}" alt="">
                         <figcaption>Mini Succulent Combo Pot</figcaption>
                     </figure>
                 </article>
@@ -223,19 +278,19 @@
     <section class="catagory-section fade-in-section">
         <div class="catagory-logos">
             <div class="cat-item">
-                <img src="images/cat1.png" alt="Indoor Plants">
+                <img src="{% static 'images/cat1.png' %}" alt="Indoor Plants">
                 <h3 class="category-heading">Indoor Plants</h3>
             </div>
             <div class="cat-item">
-                <img src="images/cat2.png" alt="Outdoor Plants">
+                <img src="{% static 'images/cat2.png' %}" alt="Outdoor Plants">
                 <h3 class="category-heading">Outdoor Plants</h3>
             </div>
             <div class="cat-item">
-                <img src="images/cat3.png" alt="Customised Pots">
+                <img src="{% static 'images/cat3.png' %}" alt="Customised Pots">
                 <h3 class="category-heading">Customised Pots</h3>
             </div>
             <div class="cat-item">
-                <img src="images/cat4.png" alt="Fertilizers & Plant Food">
+                <img src="{% static 'images/cat4.png' %}" alt="Fertilizers & Plant Food">
                 <h3 class="category-heading">Fertilizers & Plant Food</h3>
             </div>
         </div>
@@ -243,7 +298,7 @@
 
     <!-- leaf -->
     <div class="floating-leaf floating-leaf-right">
-        <img src="images/leaf1.png" alt="Floating Leaf Right" />
+        <img src="{% static 'images/leaf1.png' %}" alt="Floating Leaf Right" />
     </div>
     <!-- leaf -->
     <!-- catagory section end -->
@@ -373,7 +428,7 @@
 
             <!-- Left: Poster Image -->
             <div class="ad-image">
-                <img src="images/ad.png" alt="Indoor Plant Decor Poster">
+                <img src="{% static 'images/ad.png' %}" alt="Indoor Plant Decor Poster">
             </div>
 
             <!-- Right: Text Content -->
@@ -436,8 +491,8 @@
             <!-- Card 2 -->
             <div class="reason-card">
                 <div class="icon-box">
-                    <img src="images\aesthetic-designs-stylish-planters-to-match-modern.svg" alt="" srcset=""
-                        style="height: 100%; width: 100%;">
+                    <img src="{% static 'images\aesthetic-designs-stylish-planters-to-match-modern.svg' %}" alt=""
+                        srcset="" style="height: 100%; width: 100%;">
                     <!-- <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2f613f" viewBox="0 0 24 24">
                         <path stroke-width="1.5" d="M12 2L2 7l10 5 10-5-10-5zm0 13v7" />
                     </svg> -->
@@ -535,10 +590,10 @@
 
     <footer class="custom-footer">
         <!-- Decorative Images -->
-        <img src="images/leaf4.PNG" class="footer-leaf-left-up" alt="Leaf Decoration">
-        <img src="images/footer1.png" class="footer-leaf-left-down" alt="Leaf Decoration">
-        <img src="images/footer2.png" class="footer-leaf-right" alt="Leaf Decoration">
-        <img src="images/footer3.png" class="footer-plant" alt="Plant Decoration">
+        <img src="{% static 'images\leaf4.png' %}" class="footer-leaf-left-up" alt="Leaf Decoration">
+        <img src="{% static 'images\footer1.png' %}" class="footer-leaf-left-down" alt="Leaf Decoration">
+        <img src="{% static 'images\footer2.png' %}" class="footer-leaf-right" alt="Leaf Decoration">
+        <img src="{% static 'images\footer3.png' %}" class="footer-plant" alt="Plant Decoration">
 
         <!-- Footer Content -->
 
@@ -587,5 +642,174 @@
     <script src="{% static 'js/main.js' %}"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script> -->
 </body>
+
+
+<script>
+    // User login Form and page loded token check functions
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.getElementById("loginBtn");
+        const userMenuContainer = document.getElementById("userMenuContainer");
+        const loginPopup = document.getElementById("loginPopup");
+
+        const setLoginLinkToDefault = () => {
+            loginBtn.innerHTML = `
+      <svg width="20" height="20" fill="currentColor">
+        <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+      </svg> Login
+    `;
+        };
+
+        const renderUserDropdown = (firstName = "User") => {
+            userMenuContainer.innerHTML = `
+      <div class="dropdown">
+        <a class="dropdown-toggle" id="userDropdown">
+          <svg width="20" height="20" fill="currentColor">
+            <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+          </svg> ${firstName}
+        </a>
+        <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+          <a href="/profile.html">Profile</a>
+          <a href="#" id="logoutBtn">Logout</a>
+        </div>
+      </div>
+    `;
+
+            document.getElementById("userDropdown").addEventListener("click", () => {
+                const menu = document.getElementById("dropdownMenu");
+                menu.style.display = menu.style.display === "none" ? "block" : "none";
+            });
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.removeItem("authToken");
+                window.location.href = "/";
+            });
+        };
+
+        const validateToken = async () => {
+            const token = localStorage.getItem("authToken");
+            if (!token) return setLoginLinkToDefault();
+
+            try {
+                const res = await fetch("/api/validate-token/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`
+                    }
+                });
+
+                if (!res.ok) throw new Error("Invalid token");
+
+                const data = await res.json();
+                renderUserDropdown(data.first_name);
+            } catch (err) {
+                console.warn("Token validation failed:", err);
+                setLoginLinkToDefault();
+            }
+        };
+
+        const handleLogin = async (e) => {
+            e.preventDefault();
+
+            const identifier = document.getElementById("identifier").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const isEmail = identifier.includes("@");
+
+            const payload = isEmail ? { email: identifier, password } : { phone: identifier, password };
+
+            try {
+                const res = await fetch("/api/login/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+
+                if (!res.ok) {
+                    alert(result.detail || "Login failed");
+                    return;
+                }
+
+                localStorage.setItem("authToken", result.token);
+                renderUserDropdown(result.user.first_name);
+                alert("Login successful!");
+
+                if (loginPopup) loginPopup.style.display = "none";
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("Something went wrong!");
+            }
+        };
+
+        // Init
+        if (loginForm) loginForm.addEventListener("submit", handleLogin);
+        validateToken();
+    });
+</script>
+
+
+
+<script>
+    // User Registration Form Function
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const first_name = document.getElementById("firstName").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+
+            fetch("http://127.0.0.1:8000/user/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    first_name: first_name,
+                    email: email,
+                    phone: phone,
+                    password: password
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP status " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || data.error);
+                    if (data.message) location.reload();
+                })
+                .catch(err => {
+                    alert("Something went wrong: " + err);
+                });
+        });
+
+        // CSRF helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
 
 </html>
