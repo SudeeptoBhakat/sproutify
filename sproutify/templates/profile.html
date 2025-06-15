@@ -1,0 +1,247 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sproutify</title>
+    <link rel="stylesheet" href="{% static 'css/userprofile.css' %}">
+</head>
+<body>
+    <!-- === Profile Dashboard === -->
+<div class="profile-container">
+  <div class="profile-card">
+    <h2>My Profile</h2>
+    <form id="profileForm">
+      <div class="form-row">
+        <label>First Name</label>
+        <input type="text" id="firstName" value="John" />
+      </div>
+      <div class="form-row">
+        <label>Last Name</label>
+        <input type="text" id="lastName" value="Doe" />
+      </div>
+      <div class="form-row">
+        <label>Email</label>
+        <input type="email" id="email" value="john@example.com" readonly />
+      </div>
+      <div class="form-row">
+        <label>Phone</label>
+        <input type="text" id="phone" value="9876543210" />
+      </div>
+      <div class="form-row">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="M">Male</option>
+          <option value="F">Female</option>
+          <option value="O">Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Short Intro</label>
+        <textarea id="shortIntro">Nature lover and gardener</textarea>
+      </div>
+      <div class="form-row">
+        <label>State</label>
+        <input type="text" id="state" value="West Bengal" />
+      </div>
+      <div class="form-row">
+        <label>District</label>
+        <input type="text" id="district" value="Durgapur" />
+      </div>
+      <div class="form-row">
+        <label>Street</label>
+        <input type="text" id="street" value="G.T. Road" />
+      </div>
+      <div class="form-row">
+        <label>Address Line 1</label>
+        <input type="text" id="address1" value="Block 5" />
+      </div>
+      <div class="form-row">
+        <label>PIN Code</label>
+        <input type="text" id="pinCode" value="713216" />
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="update-btn">Update Profile</button>
+        <button type="button" class="delete-btn">Delete Account</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="order-section">
+    <h2>My Orders</h2>
+    <ul class="orders">
+      <li>
+        <strong>Order #12345</strong><br />
+        Date: 2025-06-10<br />
+        Status: Delivered
+      </li>
+      <li>
+        <strong>Order #12346</strong><br />
+        Date: 2025-06-11<br />
+        Status: Processing
+      </li>
+    </ul>
+  </div>
+
+  <div class="cart-wishlist">
+    <h2>My Cart</h2>
+    <ul class="cart-items">
+      <li>Fiddle Leaf Fig Tree - ₹499</li>
+      <li>Snake Plant - ₹299</li>
+    </ul>
+
+    <h2>Loved Plants</h2>
+    <ul class="wishlist-items">
+      <li>Peace Lily</li>
+      <li>Money Plant</li>
+    </ul>
+  </div>
+</div>
+</body>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("authToken");
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Token ${token}`,
+  };
+
+  // ✅ Prefill form with current user data
+  const prefillProfile = async () => {
+    if (!token) return alert("Please login again!");
+
+    try {
+      const res = await fetch("/me/", { headers });
+      if (!res.ok) throw new Error("Failed to fetch user profile");
+      const data = await res.json();
+
+      document.getElementById("firstName").value = data.first_name || "";
+      document.getElementById("lastName").value = data.last_name || "";
+      document.getElementById("email").value = data.email || "";
+      document.getElementById("phone").value = data.phone || "";
+      document.getElementById("gender").value = data.gender || "O";
+      document.getElementById("shortIntro").value = data.short_intro || "";
+      document.getElementById("state").value = data.state || "";
+      document.getElementById("district").value = data.district || "";
+      document.getElementById("street").value = data.street || "";
+      document.getElementById("address1").value = data.address_line1 || "";
+      document.getElementById("pinCode").value = data.pin_code || "";
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      alert("Failed to load profile. Please try again.");
+    }
+  };
+
+  // ✅ Update user profile
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      first_name: document.getElementById("firstName").value,
+      last_name: document.getElementById("lastName").value,
+      phone: document.getElementById("phone").value,
+      gender: document.getElementById("gender").value,
+      short_intro: document.getElementById("shortIntro").value,
+      state: document.getElementById("state").value,
+      district: document.getElementById("district").value,
+      address_line1: document.getElementById("address1").value,
+      street: document.getElementById("street").value,
+      pin_code: document.getElementById("pinCode").value,
+    };
+
+    try {
+      const res = await fetch("/me/", {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error("Failed to update profile");
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("Please enter all the details");
+    }
+  });
+
+  // ✅ Delete user account
+  document.querySelector(".delete-btn").addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to delete your account?")) return;
+
+    try {
+      const res = await fetch("/me/", {
+        method: "DELETE",
+        headers,
+      });
+
+      if (!res.ok) throw new Error("Failed to delete account");
+
+      // Clear token and redirect
+      localStorage.removeItem("authToken");
+      alert("Account deleted. Redirecting to home...");
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete account.");
+    }
+  });
+
+  prefillProfile(); // Load profile on page load
+});
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const setLoginLinkToDefault = () => {
+    console.warn("Showing login prompt or default UI.");
+    // Optionally, hide the form or show login prompt here
+  };
+
+  const populateFormFields = (data) => {
+    document.getElementById("firstName").value = data.first_name || "";
+    document.getElementById("lastName").value = data.last_name || "";
+    document.getElementById("email").value = data.email || "";
+    document.getElementById("phone").value = data.phone || "";
+    document.getElementById("gender").value = data.gender || "O";
+    document.getElementById("shortIntro").value = data.short_intro || "";
+    document.getElementById("state").value = data.state || "";
+    document.getElementById("district").value = data.district || "";
+    document.getElementById("street").value = data.street || "";
+    document.getElementById("address1").value = data.address_line_1 || "";
+    document.getElementById("pinCode").value = data.pin_code || "";
+  };
+
+  const validateToken = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return setLoginLinkToDefault();
+
+    try {
+      const res = await fetch("/api/validate-token/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`
+        }
+      });
+
+      if (!res.ok) throw new Error("Invalid token");
+
+      const data = await res.json();
+      console.log("User data loaded:", data);
+      populateFormFields(data); // ✅ Load dynamic data into form
+    } catch (err) {
+      console.warn("Token validation failed:", err);
+      setLoginLinkToDefault();
+    }
+  };
+
+  validateToken(); // ✅ Trigger on page load
+});
+</script>
+
+</html>

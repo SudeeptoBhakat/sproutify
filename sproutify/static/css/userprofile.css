@@ -1,0 +1,117 @@
+  .profile-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: auto;
+      font-family: 'Segoe UI', sans-serif;
+  }
+
+  .profile-card,
+  .order-section,
+  .cart-wishlist {
+      background: #f8fff9;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+  }
+
+  h2 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+  }
+
+  .form-row {
+      margin-bottom: 1rem;
+  }
+
+  .form-row label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+  }
+
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border 0.2s ease;
+  }
+
+  .form-row input:focus,
+  .form-row textarea:focus,
+  .form-row select:focus {
+      border-color: #27ae60;
+      outline: none;
+  }
+
+  .btn-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+  }
+
+  .update-btn,
+  .delete-btn {
+      padding: 10px 16px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+  }
+
+  .update-btn {
+      background-color: #2ecc71;
+      color: white;
+  }
+
+  .update-btn:hover {
+      background-color: #27ae60;
+  }
+
+  .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+  }
+
+  .delete-btn:hover {
+      background-color: #c0392b;
+  }
+
+  .orders li,
+  .cart-items li,
+  .wishlist-items li {
+      background: white;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-left: 4px solid #27ae60;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  @media screen and (min-width: 768px) {
+      .profile-container {
+          grid-template-columns: 1fr 1fr;
+      }
+
+      .cart-wishlist {
+          grid-column: span 2;
+      }
+  }
+
+  @media screen and (min-width: 992px) {
+      .profile-container {
+          grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .cart-wishlist {
+          grid-column: span 3;
+      }
+  }

@@ -14,11 +14,16 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
 
 
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
+
+def profile(request):
+    return render(request, 'profile.html')
 
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
@@ -30,12 +35,29 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]  # Allow only admin to update/delete
 
-class UserProfileView(generics.RetrieveAPIView):
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            print(serializer.data)
+            return Response(serializer.data)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        user = self.get_object()
+        user.delete()
+        return Response({"detail": "User account deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
 
 @csrf_exempt
 def user_register(request):
@@ -107,3 +129,26 @@ def validate_token(request):
         "email": user.email,
         "phone": user.phone
     })
+
+
+
+
+
+
+
+# PRODUCT
+from rest_framework import generics, permissions
+from .models import Product
+from .serializers import ProductSerializer
+
+# Public access: View all products
+class ProductListView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = []  # No auth required
+
+# Admin-only: Create a new product
+class ProductCreateView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAdminUser]  # Only admin/superuser

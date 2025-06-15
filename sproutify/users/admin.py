@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from .models import CustomUser, Product
 from django.forms import TextInput, Textarea
 from django import forms
+from django.contrib import admin
+
 
 class UserAdminConfig(UserAdmin):
     model = CustomUser
@@ -29,3 +31,11 @@ class UserAdminConfig(UserAdmin):
     )
 
 admin.site.register(CustomUser, UserAdminConfig)
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'price', 'stock_quantity', 'availability', 'created_at']
+    list_filter = ['category', 'availability']
+    search_fields = ['name', 'description']
+    readonly_fields = ['created_at', 'updated_at']
