@@ -143,19 +143,19 @@
                 <li><a href="#"><strong>Pricing</strong></a></li>
                 <li><a href="#"><strong>Category</strong></a></li>
                 <li class="search-form">
-                    <form class="form">
-                        <btn type="submit">
-                            <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9"
-                                    stroke="currentColor" stroke-width="1.333" stroke-linecap="round"
-                                    stroke-linejoin="round"></path>
-                            </svg>
-                        </btn>
-                        <input class="input" placeholder="Search for Plant" required type="text">
+                    <form class="form" id="searchForm">
+                        <!-- <button type="submit" class="search-btn"> -->
+                        <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        <!-- </button> -->
+                        <input id="searchInput" class="input" autocomplete="off" placeholder="Search for a plant..."
+                            required type="text">
                     </form>
+                    <ul id="suggestions" class="suggestions-list"></ul>
                 </li>
-
                 <li>
                     <div id="userMenuContainer"><a herf="#" id="loginBtn" style="cursor: pointer;"><svg width="20"
                                 height="20" fill="currentColor">
@@ -265,7 +265,7 @@
             </div>
             <div class="arrows">
                 <button id="prev">
-                    <</button>
+                    << /button>
                         <button id="next">></button>
             </div>
         </section>
@@ -803,6 +803,49 @@
             }
             return cookieValue;
         }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("searchInput");
+        const suggestions = document.getElementById("suggestions");
+
+        let timer;
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            const val = input.value.trim();
+            suggestions.innerHTML = "";
+            suggestions.style.display = "none"; // Hide by default
+
+            if (val.length < 2) return;
+
+            timer = setTimeout(() => {
+                fetch(`/api/products/search/?q=${encodeURIComponent(val)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            suggestions.innerHTML = data
+                                .map(p => `<li data-id="${p.id}">${p.name}</li>`)
+                                .join("");
+                            suggestions.style.display = "block"; // Show suggestions
+                        } else {
+                            suggestions.style.display = "none"; // No data, hide
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Search error:", err);
+                        suggestions.style.display = "none";
+                    });
+            }, 300); // debounce
+        });
+
+        suggestions.addEventListener("click", e => {
+            if (e.target.tagName === "LI") {
+                const id = e.target.getAttribute("data-id");
+                window.location.href = `/product/${id}/`; // Adjust the path to your product overview page
+            }
+        });
     });
 </script>
 

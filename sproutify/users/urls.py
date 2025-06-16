@@ -3,6 +3,8 @@ from .views import (
     ProductCreateView,
     ProductListView,
     index,
+    product_detail_view,
+    product_search,
     profile,
     user_register,
     validate_token,
@@ -27,4 +29,6 @@ urlpatterns = [
 urlpatterns += [
     path('products/', ProductListView.as_view(), name='product-list'),
     path('products/create/', ProductCreateView.as_view(), name='product-create'),
+    path("api/products/search/", product_search, name="product-search"),
+    path("product/<int:id>/", product_detail_view, name="product-detail"),
 ]

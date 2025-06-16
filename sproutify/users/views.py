@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, permissions
 from .models import CustomUser
 from .serializers import UserSerializer
@@ -152,3 +152,21 @@ class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAdminUser]  # Only admin/superuser
+
+
+# PRODUCT SEARCH
+@api_view(["GET"])
+def product_search(request):
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return Response([])
+
+    matches = Product.objects.filter(name__icontains=query)[:10]
+    serializer = ProductSerializer(matches, many=True)
+    return Response(serializer.data)
+
+
+# PRODUCT DETAILS OVERVIEW 
+def product_detail_view(request, id):
+    product = get_object_or_404(Product, id=id)
+    return render(request, "product_detail.html", {"product": product})
