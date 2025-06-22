@@ -140,7 +140,6 @@
             <ul class="nav-list">
                 <li><a href="#"><strong>Bestseller</strong></a></li>
                 <li><a href="#"><strong>Deal of the day</strong></a></li>
-                <li><a href="#"><strong>Pricing</strong></a></li>
                 <li><a href="#"><strong>Category</strong></a></li>
                 <li class="search-form">
                     <form class="form" id="searchForm">
@@ -163,7 +162,7 @@
                             </svg> Account</a></div>
                 </li>
 
-                <li><a href="#"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"
+                <li><a href="#" class="cart-view-btn"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"
                             viewBox="0 0 52 52">
                             <g>
                                 <path
@@ -580,6 +579,45 @@
     <script src="{% static 'js/main.js' %}"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script> -->
 </body>
+
+<script>
+// Add to cart button function
+document.addEventListener("click", function (e) {
+  if (e.target.matches(".add-to-cart-btn")) {
+    const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      loginPopup.classList.remove("hidden");
+      return;
+    }
+
+    const productId = e.target.dataset.productId;
+
+    fetch("/cart/add/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${authToken}`,
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        quantity: 1,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert("Product added to cart!");
+        window.location.href = "/cart/"; // redirect to cart page
+      })
+      .catch((err) => {
+        console.error("Add to cart failed", err);
+        alert("Failed to add to cart. Please try again.");
+      });
+  }
+});
+
+  </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("productContainer");
@@ -612,6 +650,7 @@
                     const productCard = document.createElement("div");
                     productCard.className = "product-card";
                     productCard.innerHTML = `
+                                                     <a href="/product/${product.id}/">
           <div class="product-image">
             ${discount ? `<span class="discount-badge">${discount}% OFF</span>` : ""}
             <img src="${imageUrl}" alt="${product.name}" />
@@ -621,8 +660,10 @@
             <p class="product-quantity">${product.pot_size || '1 piece'}</p>
             ${priceHtml}
             <div class="rating">⭐⭐⭐⭐☆</div>
+            </a>
             <div class="action-buttons">
-              <button class="btn primary-btn">Add to Basket</button>
+            <button class="btn primary-btn add-to-cart-btn" data-product-id="${product.id}">Add to Cart</button>
+
               <button class="btn secondary-btn">Buy Now</button>
             </div>
           </div>
@@ -847,6 +888,22 @@
             }
         });
     });
+</script>
+
+<script>
+  document.addEventListener("click", function (e) {
+    if (e.target.matches(".cart-view-btn")) {
+      const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      loginPopup.classList.remove("hidden");
+      return;
+    }
+
+      // Token exists, now redirect to /cart/
+      window.location.href = "/cart/";
+    }
+  });
 </script>
 
 </html>

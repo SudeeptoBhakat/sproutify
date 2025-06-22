@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'users',
+    'orders',
 ]
 
 REST_FRAMEWORK = {
@@ -146,3 +147,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+RAZORPAY_KEY_ID = "rzp_test_ga5rgK4ToFKzWn"
+RAZORPAY_SECRET_KEY = "GUFWSdzz5W96IbW8lnflMXEi"

@@ -1,101 +1,1169 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Overview | Sproutify</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Sproutify - Product Overview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f8f9fa; color: #333; line-height: 1.6; }
-    .container { max-width: 1200px; margin: auto; padding: 20px; }
+    :root {
+      --primary: #4CAF50;
+      --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --text-color: #333;
+      --bg-light: #f9f9f9;
+      --border-color: #ddd;
+      --badge-bg: #e8f5e9;
+    }
 
-    .product-wrapper { display: flex; flex-wrap: wrap; gap: 30px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .product-image { flex: 1; min-width: 300px; }
-    .product-image img { width: 100%; border-radius: 8px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    .product-details { flex: 2; min-width: 300px; display: flex; flex-direction: column; gap: 12px; }
-    .product-details h1 { font-size: 2rem; color: #2e7d32; }
-    .price { font-size: 1.5rem; color: #e53935; }
-    .price del { font-size: 1rem; color: #888; margin-left: 10px; }
-    .availability { font-weight: bold; color: #388e3c; }
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background: var(--bg-light);
+      color: var(--text-color);
+    }
 
-    .actions { display: flex; gap: 10px; margin: 10px 0; }
-    .btn { padding: 12px 20px; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-    .btn-buy { background: #4caf50; color: white; }
-    .btn-cart { background: #fff; border: 2px solid #4caf50; color: #4caf50; }
-    .btn:hover { opacity: 0.85; }
 
-    .section { margin-top: 30px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
-    .section h3 { margin-bottom: 10px; font-size: 1.2rem; color: #2e7d32; }
+    /* Nav */
+    header {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      grid-template-rows: 80px;
+      position: relative;
+      top: 0;
+      z-index: 1000;
+      left: 50%;
+      background: linear-gradient(85deg,
+          #66bb6a7a,
+          #7cd68093,
+          #7bc07f6c,
+          #97cf9a6b,
+          #9fd3a188);
+      transform: translateX(-50%);
+      transition:
+        transform 0.5s ease-in-out,
+        background-color 0.3s ease-in-out,
+        backdrop-filter 0.3s ease-in-out,
+        opacity 0.3s ease-in-out;
+    }
 
-    .rating { display: flex; align-items: center; gap: 10px; }
-    .stars { color: #ffc107; }
+    /* Add this new class */
+    header.scrolled {
+      transform: translateX(-50%) translateY(2rem);
+      /* opacity: 1; */
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 75%;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(85deg,
+          #66bb6a7a,
+          #7cd68093,
+          #7bc07f6c,
+          #97cf9a6b,
+          #9fd3a188);
+      border-radius: 10rem;
+      z-index: 1000;
+      transition: all 0.3s ease-out;
+    }
 
-    .comment { padding: 10px 0; border-bottom: 1px solid #eee; }
-    .comment:last-child { border-bottom: none; }
+    header .logo img {
+      width: 100%;
+    }
+
+    header .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    header nav a {
+      color: #000;
+      font-weight: 400;
+      text-decoration: none;
+    }
+
+    header nav ul {
+      height: 100%;
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      gap: 30px;
+      padding-right: 30px;
+      list-style-type: none;
+    }
+
+    header nav {
+      border-left: 1px solid var(--border-color);
+    }
+
+    /* search */
+
+    .form button {
+      border: none;
+      background: none;
+      color: #8b8ba7;
+    }
+
+    /* styling of whole input container */
+    .form {
+      --timing: 0.3s;
+      --width-of-input: 200px;
+      --height-of-input: 40px;
+      --border-height: 2px;
+      --input-bg: #fff;
+      --border-color: #4caf50;
+      --border-radius: 30px;
+      --after-border-radius: 1px;
+      position: relative;
+      width: var(--width-of-input);
+      height: var(--height-of-input);
+      display: flex;
+      align-items: center;
+      padding-inline: 0.8em;
+      border-radius: var(--border-radius);
+      transition: border-radius 0.5s ease;
+      background: var(--input-bg, #fff);
+    }
+
+    /* styling of Input */
+    .input {
+      font-size: 0.9rem;
+      background-color: transparent;
+      width: 100%;
+      height: 100%;
+      padding-inline: 0.5em;
+      padding-block: 0.7em;
+      border: none;
+    }
+
+    /* styling of animated border */
+    .form:before {
+      content: "";
+      position: absolute;
+      background: var(--border-color);
+      transform: scaleX(0);
+      transform-origin: center;
+      width: 100%;
+      height: var(--border-height);
+      left: 0;
+      bottom: 0;
+      border-radius: 1px;
+      transition: transform var(--timing) ease;
+    }
+
+    /* Hover on Input */
+    .form:focus-within {
+      border-radius: var(--after-border-radius);
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    /* here is code of animated border */
+    .form:focus-within:before {
+      transform: scale(1);
+    }
+
+    /* styling of close button */
+    /* == you can click the close button to remove text == */
+    .reset {
+      border: none;
+      background: none;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* close button shown when typing */
+    input:not(:placeholder-shown)~.reset {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* sizing svg icons */
+
+    nav ul li a:hover {
+      color: #4caf50;
+    }
+
+    .suggestions-list {
+      display: none;
+      position: absolute;
+      list-style: none;
+      margin: 0;
+      padding: 6px 0;
+      width: 15%;
+      background: #fff;
+      border: 1px solid #d4e2d4;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      animation: fadeIn 0.25s ease-in-out;
+      z-index: 999;
+    }
+
+
+    .suggestions-list li {
+      padding: 12px 18px;
+      font-size: 15px;
+      color: #2e3f30;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+      border-bottom: 1px solid #f1f3f1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    /* Hover effect */
+    .suggestions-list li:hover {
+      background: linear-gradient(to right, #eafbea, #dcf5e3);
+      color: #1b5e20;
+      transform: translateX(2px);
+      border-radius: 6px;
+    }
+
+    /* Last item no border */
+    .suggestions-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* Scrollbar style */
+    .suggestions-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .suggestions-list::-webkit-scrollbar-thumb {
+      background-color: #cce7c9;
+      border-radius: 3px;
+    }
+
+    .suggestions-list::-webkit-scrollbar-track {
+      background-color: #f9f9f9;
+    }
+
+    /* Fade animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* search end */
+
+    /* Mobile menu toggle button */
+    .menu-toggle {
+      display: none;
+    }
+
+    .menu-icon {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      padding: 1rem;
+    }
+
+    .menu-icon span {
+      height: 3px;
+      width: 25px;
+      background: #4caf50;
+      margin: 4px 0;
+      transition: 0.3s;
+    }
+
+    /* Responsive layout */
+    @media (max-width: 768px) {
+      header {
+        grid-template-columns: 1fr auto;
+        padding: 0 1rem;
+      }
+
+      header .logo img {
+        width: 60%;
+      }
+
+      .menu-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .main-nav {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        backdrop-filter: blur(10px);
+        background: linear-gradient(85deg,
+            #66bb6a7a,
+            #7cd68093,
+            #7bc07f6c,
+            #97cf9a6b,
+            #9fd3a188);
+        border-top: 1px solid #ddd;
+        display: none;
+        flex-direction: column;
+        border-radius: 10%;
+      }
+
+      .main-nav ul.nav-list {
+        flex-direction: column;
+        gap: 20px;
+        padding: 1rem;
+      }
+
+      #menu-toggle:checked~nav.main-nav {
+        display: flex;
+      }
+
+      .search-form {
+        width: 50%;
+      }
+    }
+
+    /* nav end */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .images {
+      flex: 1 1 40%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .images img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .details {
+      flex: 1 1 55%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .details h1 {
+      font-size: 2rem;
+      margin-bottom: 0;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .price del {
+      font-size: 1rem;
+      color: #888;
+      margin-left: 0.5rem;
+    }
+
+    .selector select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .quantity button {
+      padding: 0.5rem 1rem;
+      background: var(--primary);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .actions button {
+      padding: 0.75rem 1.5rem;
+      margin-right: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .actions button:first-child {
+      background: var(--primary);
+      color: white;
+    }
+
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      background: var(--badge-bg);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .tabs {
+      max-width: 1200px;
+      margin: 2rem auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab {
+      flex: 1 1 40%;
+    }
+
+    .tab h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
 
     @media (max-width: 768px) {
-      .product-wrapper { flex-direction: column; }
+
+      .container,
+      .tabs {
+        flex-direction: column;
+      }
+
+      .details h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .sticky-cart {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sticky-cart button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .sticky-cart {
+        display: flex;
+      }
     }
   </style>
 </head>
+
 <body>
+
+      <!-- login model start -->
+
+    <!-- LOGIN POPUP -->
+    <div id="loginPopup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-btn" id="loginCloseBtn">&times;</span>
+            <h2>Login to Sproutify</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email or Phone</label>
+                    <input type="text" id="identifier" placeholder="Enter your email or phone" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required />
+                </div>
+                <button type="submit" class="btn-submit">Login</button>
+            </form>
+
+            <div>Don't have an account? <a href="#" id="showRegisterBtn">Register Now</a></div>
+        </div>
+    </div>
+
+    <!-- REGISTER POPUP -->
+    <div id="registerPopup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-btn" id="registerCloseBtn">&times;</span>
+            <h2>Register to Sproutify</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="Enter your first name" required />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required />
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="phone" placeholder="Enter your phone number" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Create a password" required />
+                </div>
+                <button type="submit" class="btn-submit">Register</button>
+            </form>
+            <div>Already have an account? <a href="#" id="showLoginBtn">Login Now</a></div>
+        </div>
+    </div>
+
+
+    <!-- login model end -->
+
+  <!-- navbar -->
+  <header>
+    <figure class="logo">
+      <img src="{% static 'images/logo1.0.png' %}" alt="" style="padding-left: 10px;">
+    </figure>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a href="#"><strong>Bestseller</strong></a></li>
+        <li><a href="#"><strong>Deal of the day</strong></a></li>
+        <li><a href="#"><strong>Category</strong></a></li>
+        <li class="search-form">
+          <form class="form" id="searchForm">
+            <!-- <button type="submit" class="search-btn"> -->
+            <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <!-- </button> -->
+            <input id="searchInput" class="input" autocomplete="off" placeholder="Search for a plant..." required
+              type="text">
+          </form>
+          <ul id="suggestions" class="suggestions-list"></ul>
+        </li>
+        <li>
+          <div id="userMenuContainer"><a herf="#" id="loginBtn" style="cursor: pointer;"><svg width="20" height="20"
+                fill="currentColor">
+                <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+              </svg> Account</a></div>
+        </li>
+
+        <li><a href="#" class="cart-view-btn"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px"
+              viewBox="0 0 52 52">
+              <g>
+                <path
+                  d="M20.1,26H44c0.7,0,1.4-0.5,1.5-1.2l4.4-15.4c0.3-1.1-0.5-2-1.5-2H11.5l-0.6-2.3c-0.3-1.1-1.3-1.8-2.3-1.8H4.6c-1.3,0-2.5,1-2.6,2.3C1.9,7,3.1,8.2,4.4,8.2h2.3l7.6,25.7c0.3,1.1,1.2,1.8,2.3,1.8h28.2c1.3,0,2.5-1,2.6-2.3c0.1-1.4-1.1-2.6-2.4-2.6H20.2c-1.1,0-2-0.7-2.3-1.7v-0.1C17.4,27.5,18.6,26,20.1,26z" />
+                <circle cx="20.6" cy="44.6" r="4" />
+                <circle cx="40.1" cy="44.6" r="4" />
+              </g>
+            </svg> Cart</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- navbar -->
+
 {% block content %}
-  <div class="container">
-    <div class="product-wrapper">
-      <div class="product-image">
-        <img src="{{ product.image.url }}" alt="{{ product.name }}">
-      </div>
-      <div class="product-details">
-        <h1>{{ product.name }}</h1>
-        <div class="rating">
-          <span class="stars">★★★★☆</span> <span>(124 reviews)</span>
-        </div>
-        <p class="price">₹{{ product.discount_price }} <del>₹{{ product.price }}</del> (20% OFF)</p>
-        <p class="availability">{{ product.availability }}</p>
-        <p><strong>Category:</strong> {{ product.category }}</p>
-        <p><strong>Pot Size:</strong> 5 inch</p>
-        <p><strong>Height:</strong> 35 cm</p>
-        <p><strong>Climate:</strong> Tropical</p>
-        <p><strong>Sunlight:</strong> Indirect</p>
-        <p><strong>Watering:</strong> Once in 3 days</p>
+<div class="container">
+  <div class="images">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    {% else %}
+      <img src="https://via.placeholder.com/500x500" alt="{{ product.name }}">
+    {% endif %}
+  </div>
 
-        <div class="actions">
-          <button class="btn btn-buy">Buy Now</button>
-          <button class="btn btn-cart">Add to Cart</button>
-        </div>
-      </div>
+  <div class="details">
+    <h1>{{ product.name }}</h1>
+
+    <div>
+      ⭐⭐⭐⭐☆ ({{ product.reviews.count }} reviews)
     </div>
 
-    <div class="section">
-      <h3>Description</h3>
-      <p>{{ product.description }}</p>
+    <p>{{ product.short_description|default:product.description|truncatechars:160 }}</p>
+
+    <div class="price">
+      ₹{{ product.discount_price|default:product.price }}
+      {% if product.discount_price %}
+        <del>₹{{ product.price }}</del>
+      {% endif %}
     </div>
 
-    <div class="section">
-      <h3>Care Instructions</h3>
-      <p>{{ product.care_instructions }}</p>
+    {% if product.pot_size %}
+    <div class="selector">
+      Size:
+      <select>
+        <option selected>{{ product.pot_size }}</option>
+      </select>
+    </div>
+    {% endif %}
+
+    <div class="quantity">
+      Quantity:
+      <button onclick="decreaseQty()">-</button>
+      <span id="qty">1</span>
+      <button onclick="increaseQty()">+</button>
     </div>
 
-    <div class="section">
-      <h3>Delivery Information</h3>
-      <p>Delivered within 3-5 business days. Eco-friendly packaging. Free delivery on orders above ₹499.</p>
+    <div class="actions">
+      <button class="btn primary-btn add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button>
+      <button style="background: none; color: var(--primary);">❤️ Wishlist</button>
     </div>
 
-    <div class="section">
-      <h3>Return & Refund Policy</h3>
-      <p>7-day return window. Refunds processed within 5 working days after pickup. Plant must be unused and in original condition.</p>
-    </div>
+    <div>🚚 Get it by <strong>{{ product.created_at|date:"l, M d" }}</strong></div>
 
-    <div class="section">
-      <h3>Customer Reviews</h3>
-      <div class="comment"><strong>Anjali R.:</strong> Beautiful and healthy plant. Loved the packaging!</div>
-      <div class="comment"><strong>Rahul K.:</strong> Came fresh and well-packed. Happy with the service.</div>
-      <div class="comment"><strong>Sneha P.:</strong> My mom loves it! Looks just like the photo.</div>
+    <div class="trust-badges">
+      <div class="badge">✅ 7-Day Replacement</div>
+      <div class="badge">🧼 Pesticide-Free</div>
+      <div class="badge">♻️ Eco Packaging</div>
+      <div class="badge">🪴 Live Plant Guarantee</div>
     </div>
   </div>
-  {% endblock %} 
-</body>
-</html>
+</div>
 
+<section class="tabs">
+  <div class="tab">
+    <h3>🌟 Description</h3>
+    <p>{{ product.description }}</p>
+  </div>
+
+  <div class="tab">
+    <h3>📋 Specifications</h3>
+    <ul>
+      {% if product.category %}<li>Type: {{ product.category }}</li>{% endif %}
+      {% if product.sunlight %}<li>Light: {{ product.sunlight }}</li>{% endif %}
+      {% if product.water_frequency %}<li>Water: {{ product.water_frequency }}</li>{% endif %}
+      {% if product.height_cm %}<li>Size: {{ product.height_cm }} cm tall</li>{% endif %}
+    </ul>
+  </div>
+
+  <div class="tab">
+    <h3>📦 Delivery & Returns</h3>
+    <p>Delivered in 3–5 business days. Easy 7-day return policy.</p>
+  </div>
+
+  <div class="tab">
+    <h3>💬 Reviews</h3>
+    {% for review in product.reviews.all %}
+      <p>⭐️{{ review.rating }} – “{{ review.comment }}”</p>
+    {% empty %}
+      <p>No reviews yet. Be the first to review!</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+
+  <section class="related-products">
+    <h3>You might also like</h3>
+            <div class="product-grid" id="productContainer">
+            <p>Loading products...</p>
+        </div>
+  </section>
+
+    <footer class="custom-footer">
+        <!-- Decorative Images -->
+        <img src="{% static 'images\leaf4.png' %}" class="footer-leaf-left-up" alt="Leaf Decoration">
+        <img src="{% static 'images\footer1.png' %}" class="footer-leaf-left-down" alt="Leaf Decoration">
+        <img src="{% static 'images\footer2.png' %}" class="footer-leaf-right" alt="Leaf Decoration">
+        <img src="{% static 'images\footer3.png' %}" class="footer-plant" alt="Plant Decoration">
+
+        <!-- Footer Content -->
+
+        <div class="footer-container">
+            <div class="footer-section">
+                <div class="footer-toggle">About Sproutify</div>
+                <div class="footer-content">
+                    <p>At Sproutify, we believe in nurturing nature the way it was meant to grow—organically and with
+                        care. Our mission is to inspire greener living through sustainable practices and 100% organic
+                        tree growth solutions. Whether you're starting a home garden or cultivating a lush nursery,
+                        Sproutify provides the tools, knowledge, and ethically-grown plants to help your green space
+                        thrive naturally. </p><br>
+                    <p> Join us in growing a cleaner, greener tomorrow—one <strong>Sprout</strong> at a time.</p>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <div class="footer-toggle">Quick Links</div>
+                <div class="footer-content">
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#product-section">Pricing</a></li>
+                        <li><a href="#why-choose-us">Features</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">Rules</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <div class="footer">Get in Touch</div>
+                <div class="footer">
+                    <p>New Egara,<br>Raniganj, WB 713347</p>
+                    <p>Email: sumanmalla02@gmail.com</p>
+                    <p>Phone: +91 90642 66209</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Sproutify. All rights reserved. Made with ❤️</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- footer end -->
+
+  <div class="sticky-cart">
+    <span>$39.99 (Qty: <span id="qty-mobile">1</span>)</span>
+   <button class="btn primary-btn add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button>
+  </div>
+
+  <script>
+  // ===========================
+//  Login Popup Shows
+// ===========================
+document.addEventListener("DOMContentLoaded", function () {
+  const loginPopup = document.getElementById("loginPopup");
+  const registerPopup = document.getElementById("registerPopup");
+
+  const loginBtn = document.getElementById("loginBtn");
+  const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+  const registerCloseBtn = document.getElementById("registerCloseBtn");
+  const showRegisterBtn = document.getElementById("showRegisterBtn");
+  const showLoginBtn = document.getElementById("showLoginBtn");
+
+  // Show Login
+  loginBtn?.addEventListener("click", () => {
+    loginPopup.classList.remove("hidden");
+  });
+
+  // Close Login
+  loginCloseBtn?.addEventListener("click", () => {
+    loginPopup.classList.add("hidden");
+  });
+
+  // Show Register from Login
+  showRegisterBtn?.addEventListener("click", () => {
+    loginPopup.classList.add("hidden");
+    registerPopup.classList.remove("hidden");
+  });
+
+  // Show Login from Register
+  showLoginBtn?.addEventListener("click", () => {
+    registerPopup.classList.add("hidden");
+    loginPopup.classList.remove("hidden");
+  });
+
+  // Close Register
+  registerCloseBtn?.addEventListener("click", () => {
+    registerPopup.classList.add("hidden");
+  });
+});
+</script>
+
+<script>
+// Add to cart button function
+document.addEventListener("click", function (e) {
+  if (e.target.matches(".add-to-cart-btn")) {
+    const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      loginPopup.classList.remove("hidden");
+      return;
+    }
+
+    const productId = e.target.dataset.productId;
+
+fetch("/cart/add/", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Token ${authToken}`,
+  },
+  body: JSON.stringify({
+    product_id: productId,
+    quantity: 1,
+  }),
+})
+  .then((res) => {
+    if (!res.ok) throw new Error("Network response was not ok");
+    return res.json(); // parse only once
+  })
+  .then((data) => {
+    console.log(data); // check returned data if needed
+    alert("Product added to cart!");
+    window.location.href = "/cart/";
+  })
+  .catch((err) => {
+    console.error("Add to cart failed", err);
+    alert("Failed to add to cart. Please try again.");
+  });
+
+}})
+
+  </script>
+  
+  <script src="{% static 'js/main.js' %}"></script>
+  
+<script>
+  document.addEventListener("click", function (e) {
+    if (e.target.matches(".cart-view-btn")) {
+      const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      loginPopup.classList.remove("hidden");
+      return;
+    }
+
+      // Token exists, now redirect to /cart/
+      window.location.href = "/cart/";
+    }
+  });
+</script>
+  
+  <script>
+    let qty = 1;
+    function increaseQty() {
+      qty++;
+      document.getElementById('qty').innerText = qty;
+      document.getElementById('qty-mobile').innerText = qty;
+    }
+    function decreaseQty() {
+      if (qty > 1) qty--;
+      document.getElementById('qty').innerText = qty;
+      document.getElementById('qty-mobile').innerText = qty;
+    }
+  </script>
+</body>
+<script>
+  // ===========================
+  //  Sticky Header on Scroll
+  // ===========================
+  window.addEventListener("scroll", () => {
+    const header = document.querySelector("header");
+    header.classList.toggle("scrolled", window.scrollY > 200);
+  });
+</script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script> -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("productContainer");
+        container.innerHTML = ""; // Clear loading text
+
+        fetch("/products/")
+            .then(res => {
+                if (!res.ok) throw new Error("Network error");
+                return res.json();
+            })
+            .then(products => {
+                if (products.length === 0) {
+                    container.innerHTML = "<p>No products available right now.</p>";
+                    return;
+                }
+
+                products.forEach(product => {
+                    const discount = product.discount_price
+                        ? Math.round(((product.price - product.discount_price) / product.price) * 100)
+                        : null;
+
+                    const priceHtml = `
+          <div class="price-box">
+            <span class="new-price">₹${product.discount_price || product.price}</span>
+            ${product.discount_price ? `<span class="old-price">₹${product.price}</span>` : ""}
+          </div>`;
+
+                    const imageUrl = product.image || "images/default.jpg";
+
+                    const productCard = document.createElement("div");
+                    productCard.className = "product-card";
+                    productCard.innerHTML = `
+               <a href="/product/${product.id}/">
+          <div class="product-image">
+            ${discount ? `<span class="discount-badge">${discount}% OFF</span>` : ""}
+            <img src="${imageUrl}" alt="${product.name}" />
+          </div>
+          <div class="product-details">
+            <h4 class="product-name">${product.name}</h4>
+            <p class="product-quantity">${product.pot_size || '1 piece'}</p>
+            ${priceHtml}
+            <div class="rating">⭐⭐⭐⭐☆</div>
+                    </a>
+            <div class="action-buttons">
+             <button class="btn primary-btn add-to-cart-btn" data-product-id="${product.id}">Add to Cart</button>
+              <button class="btn secondary-btn">Buy Now</button>
+            </div>
+          </div>
+        `;
+                    container.appendChild(productCard);
+                });
+            })
+            .catch(err => {
+                console.error("Failed to fetch products", err);
+                container.innerHTML = "<p>Unable to load products. Please try again later.</p>";
+            });
+    });
+</script>
+
+
+<script>
+    // User login Form and page loded token check functions
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.getElementById("loginBtn");
+        const userMenuContainer = document.getElementById("userMenuContainer");
+        const loginPopup = document.getElementById("loginPopup");
+
+        const setLoginLinkToDefault = () => {
+            loginBtn.innerHTML = `
+      <svg width="20" height="20" fill="currentColor">
+        <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+      </svg> Login
+    `;
+        };
+
+        const renderUserDropdown = (firstName = "User") => {
+            userMenuContainer.innerHTML = `
+      <div class="dropdown">
+        <a class="dropdown-toggle" id="userDropdown">
+          <svg width="20" height="20" fill="currentColor">
+            <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+          </svg> ${firstName}
+        </a>
+        <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+          <a href="/profile">Profile</a>
+          <a href="#" id="logoutBtn">Logout</a>
+        </div>
+      </div>
+    `;
+
+            document.getElementById("userDropdown").addEventListener("click", () => {
+                const menu = document.getElementById("dropdownMenu");
+                menu.style.display = menu.style.display === "none" ? "block" : "none";
+            });
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.removeItem("authToken");
+                window.location.href = "/";
+            });
+        };
+
+        const validateToken = async () => {
+            const token = localStorage.getItem("authToken");
+            if (!token) return setLoginLinkToDefault();
+
+            try {
+                const res = await fetch("/api/validate-token/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`
+                    }
+                });
+
+                if (!res.ok) throw new Error("Invalid token");
+
+                const data = await res.json();
+                renderUserDropdown(data.first_name);
+            } catch (err) {
+                console.warn("Token validation failed:", err);
+                setLoginLinkToDefault();
+            }
+        };
+
+        const handleLogin = async (e) => {
+            e.preventDefault();
+
+            const identifier = document.getElementById("identifier").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const isEmail = identifier.includes("@");
+
+            const payload = isEmail ? { email: identifier, password } : { phone: identifier, password };
+
+            try {
+                const res = await fetch("/api/login/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+
+                if (!res.ok) {
+                    alert(result.detail || "Login failed");
+                    return;
+                }
+
+                localStorage.setItem("authToken", result.token);
+                renderUserDropdown(result.user.first_name);
+                alert("Login successful!");
+
+                if (loginPopup) loginPopup.style.display = "none";
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("Something went wrong!");
+            }
+        };
+
+        // Init
+        if (loginForm) loginForm.addEventListener("submit", handleLogin);
+        validateToken();
+    });
+</script>
+
+
+
+<script>
+    // User Registration Form Function
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const registerForm = document.getElementById("registerForm");
+
+        registerForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const first_name = document.getElementById("firstName").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+
+            fetch("http://127.0.0.1:8000/user/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    first_name: first_name,
+                    email: email,
+                    phone: phone,
+                    password: password
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP status " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message || data.error);
+                    if (data.message) location.reload();
+                })
+                .catch(err => {
+                    alert("Something went wrong: " + err);
+                });
+        });
+
+        // CSRF helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("searchInput");
+        const suggestions = document.getElementById("suggestions");
+
+        let timer;
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            const val = input.value.trim();
+            suggestions.innerHTML = "";
+            suggestions.style.display = "none"; // Hide by default
+
+            if (val.length < 2) return;
+
+            timer = setTimeout(() => {
+                fetch(`/api/products/search/?q=${encodeURIComponent(val)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            suggestions.innerHTML = data
+                                .map(p => `<li data-id="${p.id}">${p.name}</li>`)
+                                .join("");
+                            suggestions.style.display = "block"; // Show suggestions
+                        } else {
+                            suggestions.style.display = "none"; // No data, hide
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Search error:", err);
+                        suggestions.style.display = "none";
+                    });
+            }, 300); // debounce
+        });
+
+        suggestions.addEventListener("click", e => {
+            if (e.target.tagName === "LI") {
+                const id = e.target.getAttribute("data-id");
+                window.location.href = `/product/${id}/`; // Adjust the path to your product overview page
+            }
+        });
+    });
+</script>
+</html>
