@@ -2,246 +2,566 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sproutify</title>
-    <link rel="stylesheet" href="{% static 'css/userprofile.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sproutify - Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/userprofile.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
+<style>
+  /* Orders section base styles */
+  .orders {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .accordion-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  /* Accordion header */
+  .accordion-header {
+    background-color: #f6fdf7;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .accordion-icon {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .accordion-header.active .accordion-icon {
+    transform: rotate(45deg);
+    /* + to x */
+  }
+
+  /* Accordion content */
+  .accordion-content {
+    display: none;
+    padding: 15px 20px;
+    background-color: #fff;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .accordion-content ul {
+    padding: 0;
+    margin: 10px 0 0;
+    list-style: none;
+  }
+
+  /* Individual order item */
+  .accordion-content ul li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .accordion-content ul li img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .accordion-content ul li a {
+    font-weight: 500;
+    color: #388e3c;
+    text-decoration: none;
+  }
+
+  .accordion-content ul li a:hover {
+    text-decoration: underline;
+  }
+
+  /* Badge styling */
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+    color: white;
+  }
+
+  .badge.pending {
+    background-color: #f0ad4e;
+  }
+
+  .badge.processing {
+    background-color: #5bc0de;
+  }
+
+  .badge.delivered {
+    background-color: #5cb85c;
+  }
+
+  .badge.cancelled,
+  .badge.failed {
+    background-color: #d9534f;
+  }
+
+  /* Fade in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive Design */
+  @media screen and (max-width: 600px) {
+    .accordion-content ul li {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .accordion-content ul li img {
+      width: 100%;
+      max-width: 100px;
+      height: auto;
+    }
+  }
+</style>
+
 <body>
-    <!-- === Profile Dashboard === -->
-<div class="profile-container">
-  <div class="profile-card">
-    <h2>My Profile</h2>
-    <form id="profileForm">
-      <div class="form-row">
-        <label>First Name</label>
-        <input type="text" id="firstName" value="John" />
-      </div>
-      <div class="form-row">
-        <label>Last Name</label>
-        <input type="text" id="lastName" value="Doe" />
-      </div>
-      <div class="form-row">
-        <label>Email</label>
-        <input type="email" id="email" value="john@example.com" readonly />
-      </div>
-      <div class="form-row">
-        <label>Phone</label>
-        <input type="text" id="phone" value="9876543210" />
-      </div>
-      <div class="form-row">
-        <label>Gender</label>
-        <select id="gender">
-          <option value="M">Male</option>
-          <option value="F">Female</option>
-          <option value="O">Other</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>Short Intro</label>
-        <textarea id="shortIntro">Nature lover and gardener</textarea>
-      </div>
-      <div class="form-row">
-        <label>State</label>
-        <input type="text" id="state" value="West Bengal" />
-      </div>
-      <div class="form-row">
-        <label>District</label>
-        <input type="text" id="district" value="Durgapur" />
-      </div>
-      <div class="form-row">
-        <label>Street</label>
-        <input type="text" id="street" value="G.T. Road" />
-      </div>
-      <div class="form-row">
-        <label>Address Line 1</label>
-        <input type="text" id="address1" value="Block 5" />
-      </div>
-      <div class="form-row">
-        <label>PIN Code</label>
-        <input type="text" id="pinCode" value="713216" />
-      </div>
-      <div class="btn-row">
-        <button type="submit" class="update-btn">Update Profile</button>
-        <button type="button" class="delete-btn">Delete Account</button>
-      </div>
-    </form>
-  </div>
+  <!-- LOGIN POPUP -->
+  {% include 'partials/login_popup.html' %}
+  <!-- REGISTER POPUP -->
+  {% include 'partials/register_popup.html' %}
 
-  <div class="order-section">
-    <h2>My Orders</h2>
-    <ul class="orders">
-      <li>
-        <strong>Order #12345</strong><br />
-        Date: 2025-06-10<br />
-        Status: Delivered
-      </li>
-      <li>
-        <strong>Order #12346</strong><br />
-        Date: 2025-06-11<br />
-        Status: Processing
-      </li>
-    </ul>
-  </div>
+  <!-- preloader -->
+  {% include 'partials/preloader.html' %}
 
-  <div class="cart-wishlist">
-    <h2>My Cart</h2>
-    <ul class="cart-items">
-      <li>Fiddle Leaf Fig Tree - ₹499</li>
-      <li>Snake Plant - ₹299</li>
-    </ul>
+  <!-- Whatsapp logo -->
+  {% include "partials/whatsapp.html" %}
 
-    <h2>Loved Plants</h2>
-    <ul class="wishlist-items">
-      <li>Peace Lily</li>
-      <li>Money Plant</li>
-    </ul>
+  <!-- navbar -->
+  {% include 'partials/navbar.html' %}
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h3>My Account</h3>
+      <ul class="sidebar-nav">
+        <li class="active"><a href="#profileForm">My Details</a></li>
+        <li><a href="#ordersSection">My Orders</a></li>
+        <li><a href="#cartWishlist">My Cart & Wishlist</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <!-- === Profile Card === -->
+      <div class="card profile-card" id="profileForm">
+        <h2><i class="fas fa-user-circle"></i> My Profile</h2>
+        <form autocomplete="off">
+          <div class="grid-form">
+            <!-- [form fields as you provided, unchanged] -->
+            <div class="form-row">
+              <label>First Name</label>
+              <input type="text" id="profileFirstName" placeholder="First Name" value="" />
+            </div>
+            <div class="form-row">
+              <label>Last Name</label>
+              <input type="text" id="lastName" placeholder="Last Name" value="" />
+            </div>
+            <div class="form-row">
+              <label>Email</label>
+              <input type="email" id="profileEmail" value="" readonly />
+            </div>
+            <div class="form-row">
+              <label>Phone</label>
+              <input type="text" id="profilePhone" value="" />
+            </div>
+            <div class="form-row">
+              <label>Gender</label>
+              <select id="gender">
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div class="form-row full">
+              <label>Short Intro</label>
+              <textarea id="shortIntro">Nature lover and gardener</textarea>
+            </div>
+            <div class="form-row full">
+              <label>Address</label>
+              <input type="text" id="address1" value="" />
+            </div>
+            <div class="form-row">
+              <label>Street</label>
+              <input type="text" id="street" value="" />
+            </div>
+            <div class="form-row">
+              <label>District</label>
+              <input type="text" id="district" value="" />
+            </div>
+            <div class="form-row">
+              <label>State</label>
+              <input type="text" id="state" value="" />
+            </div>
+            <div class="form-row">
+              <label>PIN Code</label>
+              <input type="text" id="pinCode" value="" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-profile p-btn"><i class="fas fa-save"></i> Save Changes</button>
+            <button type="button" class="btn-profile d-btn"><i class="fas fa-trash-alt"></i> Delete Account</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- === Orders Section === -->
+      <div class="card order-section" id="ordersSection">
+        <h2><i class="fas fa-box"></i> My Orders</h2>
+        <div class="accordion orders">
+          <!-- JS will inject each order here -->
+        </div>
+      </div>
+
+      <!-- === Cart + Wishlist Section === -->
+      <div class="card cart-wishlist" id="cartWishlist">
+        <h2><i class="fas fa-shopping-cart"></i> My Cart</h2>
+        <div class="accordion cart-items">
+          <!-- JS will inject each item here -->
+        </div>
+        <!-- <h2><i class="fas fa-heart"></i> Loved Plants</h2>
+        <ul class="wishlist-items">
+          <li>Peace Lily</li>
+          <li>Money Plant</li>
+        </ul> -->
+      </div>
+    </main>
   </div>
-</div>
+  <!-- Footer -->
+  {% include 'partials/footer.html' %}
+
+
 </body>
-
+{% include 'partials/scripts.html' %}
+{% include 'partials/toast.html' %}
+<script>
+  // ✅ Master event listeners
+  window.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("click", handleAddToCart);
+    document.addEventListener("click", handleCartView);
+    // loadProducts();
+    initLogin();
+    initRegistration();
+    initSearch();
+  });
+</script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken");
+    const profileForm = document.getElementById("profileForm");
+    const deleteBtn = document.querySelector(".delete-btn");
 
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Token ${token}`,
-  };
+    if (!token) {
+      console.warn("No token found. Prompt user to login.");
+      return;
+    }
 
-  // ✅ Prefill form with current user data
-  const prefillProfile = async () => {
-    if (!token) return alert("Please login again!");
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token}`
+    };
 
-    try {
-      const res = await fetch("/me/", { headers });
-      if (!res.ok) throw new Error("Failed to fetch user profile");
-      const data = await res.json();
-
-      document.getElementById("firstName").value = data.first_name || "";
+    // ✅ Populate form fields
+    const populateFormFields = (data) => {
+      document.getElementById("profileFirstName").value = data.first_name || "";
       document.getElementById("lastName").value = data.last_name || "";
-      document.getElementById("email").value = data.email || "";
-      document.getElementById("phone").value = data.phone || "";
+      document.getElementById("profileEmail").value = data.email || "";
+      document.getElementById("profilePhone").value = data.phone || "";
       document.getElementById("gender").value = data.gender || "O";
       document.getElementById("shortIntro").value = data.short_intro || "";
       document.getElementById("state").value = data.state || "";
       document.getElementById("district").value = data.district || "";
       document.getElementById("street").value = data.street || "";
-      document.getElementById("address1").value = data.address_line1 || "";
+      document.getElementById("address1").value = data.address_line1 || data.address_line_1 || "";
       document.getElementById("pinCode").value = data.pin_code || "";
-    } catch (err) {
-      console.error("Profile fetch error:", err);
-      alert("Failed to load profile. Please try again.");
-    }
-  };
-
-  // ✅ Update user profile
-  document.getElementById("profileForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const formData = {
-      first_name: document.getElementById("firstName").value,
-      last_name: document.getElementById("lastName").value,
-      phone: document.getElementById("phone").value,
-      gender: document.getElementById("gender").value,
-      short_intro: document.getElementById("shortIntro").value,
-      state: document.getElementById("state").value,
-      district: document.getElementById("district").value,
-      address_line1: document.getElementById("address1").value,
-      street: document.getElementById("street").value,
-      pin_code: document.getElementById("pinCode").value,
     };
 
-    try {
-      const res = await fetch("/me/", {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(formData),
+    // ✅ Fetch profile data
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/me/", { headers });
+        if (!res.ok) throw new Error("Profile fetch failed");
+        const data = await res.json();
+        populateFormFields(data);
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        alert("Failed to load profile.");
+      }
+    };
+
+    // ✅ Update profile
+    const handleProfileUpdate = async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        first_name: document.getElementById("profileFirstName").value,
+        last_name: document.getElementById("lastName").value,
+        phone: document.getElementById("profilePhone").value,
+        gender: document.getElementById("gender").value,
+        short_intro: document.getElementById("shortIntro").value,
+        state: document.getElementById("state").value,
+        district: document.getElementById("district").value,
+        address_line1: document.getElementById("address1").value,
+        street: document.getElementById("street").value,
+        pin_code: document.getElementById("pinCode").value,
+      };
+
+      try {
+        const res = await fetch("/me/", {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(formData),
+        });
+
+        if (!res.ok) throw new Error("Update failed");
+        alert("Profile updated successfully!");
+      } catch (err) {
+        console.error("Update error:", err);
+        alert("Please fill in all details correctly.");
+      }
+    };
+
+    // ✅ Delete account
+    const handleDeleteAccount = async () => {
+      const confirmDelete = confirm("Are you sure you want to delete your account?");
+      if (!confirmDelete) return;
+
+      try {
+        const res = await fetch("/me/", { method: "DELETE", headers });
+        if (!res.ok) throw new Error("Delete failed");
+
+        localStorage.removeItem("authToken");
+        alert("Account deleted. Redirecting...");
+        window.location.href = "/";
+      } catch (err) {
+        console.error("Delete error:", err);
+        alert("Failed to delete account.");
+      }
+    };
+
+    // ✅ Smooth scrolling sidebar links
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute("href"));
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 60,
+            behavior: "smooth"
+          });
+        }
       });
+    });
 
-      if (!res.ok) throw new Error("Failed to update profile");
-      alert("Profile updated successfully!");
-    } catch (err) {
-      console.error("Update error:", err);
-      alert("Please enter all the details");
-    }
+    // ✅ Safe binding for dynamic elements
+    if (profileForm) profileForm.addEventListener("submit", handleProfileUpdate);
+    if (deleteBtn) deleteBtn.addEventListener("click", handleDeleteAccount);
+
+    fetchProfile(); // Initial load
   });
-
-  // ✅ Delete user account
-  document.querySelector(".delete-btn").addEventListener("click", async () => {
-    if (!confirm("Are you sure you want to delete your account?")) return;
-
-    try {
-      const res = await fetch("/me/", {
-        method: "DELETE",
-        headers,
-      });
-
-      if (!res.ok) throw new Error("Failed to delete account");
-
-      // Clear token and redirect
-      localStorage.removeItem("authToken");
-      alert("Account deleted. Redirecting to home...");
-      window.location.href = "/";
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Failed to delete account.");
-    }
-  });
-
-  prefillProfile(); // Load profile on page load
-});
-
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const setLoginLinkToDefault = () => {
-    console.warn("Showing login prompt or default UI.");
-    // Optionally, hide the form or show login prompt here
-  };
+  // Utility to format date
+  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString();
 
-  const populateFormFields = (data) => {
-    document.getElementById("firstName").value = data.first_name || "";
-    document.getElementById("lastName").value = data.last_name || "";
-    document.getElementById("email").value = data.email || "";
-    document.getElementById("phone").value = data.phone || "";
-    document.getElementById("gender").value = data.gender || "O";
-    document.getElementById("shortIntro").value = data.short_intro || "";
-    document.getElementById("state").value = data.state || "";
-    document.getElementById("district").value = data.district || "";
-    document.getElementById("street").value = data.street || "";
-    document.getElementById("address1").value = data.address_line_1 || "";
-    document.getElementById("pinCode").value = data.pin_code || "";
-  };
+  // Toggle accordion with icon and animation
+  function setupAccordion(containerSelector, openFirst = false) {
+    const container = document.querySelector(containerSelector);
+    const items = container.querySelectorAll(".accordion-item");
 
-  const validateToken = async () => {
+    items.forEach((item, index) => {
+      const header = item.querySelector(".accordion-header");
+      const content = item.querySelector(".accordion-content");
+      const icon = item.querySelector(".accordion-icon");
+
+      header.addEventListener("click", () => {
+        items.forEach((el) => {
+          const c = el.querySelector(".accordion-content");
+          const i = el.querySelector(".accordion-icon");
+          if (el !== item) {
+            c.classList.remove("active");
+            i.textContent = "+";
+            i.classList.remove("rotate");
+          }
+        });
+
+        content.classList.toggle("active");
+        icon.textContent = content.classList.contains("active") ? "−" : "+";
+        icon.classList.toggle("rotate", content.classList.contains("active"));
+      });
+
+      if (openFirst && index === 0) {
+        content.classList.add("active");
+        icon.textContent = "−";
+        icon.classList.add("rotate");
+      }
+    });
+  }
+
+  // Render Orders with accordion and action buttons
+  function renderOrders(orders) {
+    const container = document.querySelector(".orders");
+    if (!container || !Array.isArray(orders)) return;
+
+    if (orders.length === 0) {
+      container.innerHTML = "<li>No orders found.</li>";
+      return;
+    }
+    console.log(orders);
+    container.innerHTML = orders
+      .map((order, idx) => `
+      <div class="accordion-item">
+        <button class="accordion-header">
+          📦 Order #${order.id}
+          <span class="badge ${order.status}">${order.status}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content">
+          <p><strong>Date:</strong> ${formatDate(order.ordered_at)}</p>
+          <p><strong>Final Amount:</strong> ₹${order.final_amount}</p>
+          <p><strong>Items:</strong></p>
+          <ul>
+            ${order.items.map(item =>
+        `<a href="/product/${item.product_id}/"><li>
+          <img src="${item.product_image}" alt="${item.product_name}" />
+              ${item.product_name} × ${item.quantity} = ₹${item.total_price}
+              </li></a>`).join("")}
+          </ul>
+          <div class="tracking-info">
+            <strong>Tracking:</strong> ${order.status === "delivered" ? "✅ Delivered" : "🚚 In Progress"}
+          </div>
+          <div class="order-actions">
+            ${["pending", "failed"].includes(order.status)
+          ? `<button class="btn primary-btn">Order Now</button>`
+          : order.status === "delivered"
+            ? `<button class="btn secondary-btn">Reorder</button>`
+            : ""
+        }
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    setupAccordion(".orders", true); // Expand first by default
+  }
+
+  // Render Cart in Accordion Style
+  function renderProfileCart(items) {
+    const container = document.querySelector(".cart-items");
+    if (!container) return;
+
+    if (!items || items.length === 0) {
+      container.innerHTML = `<div class="accordion-item"><div class="accordion-header">No items in cart.</div></div>`;
+      return;
+    }
+    // console.log(items)
+    container.innerHTML = items
+      .map(item => `
+      <div class="accordion-item">
+        <button class="accordion-header">
+          🪴 ${item.product_name}
+          <span class="price">₹${item.total_price}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content">
+          <div class="cart-detail-content">
+            <img src="/media/${item.product_image}" alt="${item.product_name}" />
+            <div class="info">
+              <p><strong>Quantity:</strong> ${item.quantity}</p>
+              <p><strong>Unit Price:</strong> ₹${item.price_at_time}</p>
+              <p><strong>Total:</strong> ₹${item.total_price}</p>
+              <p><a href="/product/${item.id}/" class="product-link">View Product</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    setupAccordion(".cart-items");
+  }
+
+  // Fetch and render orders
+  async function fetchOrders() {
     const token = localStorage.getItem("authToken");
-    if (!token) return setLoginLinkToDefault();
+    if (!token) return alert("Please login to view orders.");
 
     try {
-      const res = await fetch("/api/validate-token/", {
-        method: "POST",
+      const res = await fetch("/orders/", {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`
         }
       });
-
-      if (!res.ok) throw new Error("Invalid token");
-
       const data = await res.json();
-      console.log("User data loaded:", data);
-      populateFormFields(data); // ✅ Load dynamic data into form
+      renderOrders(data);
     } catch (err) {
-      console.warn("Token validation failed:", err);
-      setLoginLinkToDefault();
+      console.error("Error fetching orders:", err);
+      document.querySelector(".orders").innerHTML = "<li>Failed to load orders.</li>";
     }
-  };
+  }
 
-  validateToken(); // ✅ Trigger on page load
-});
+  // Fetch and render cart
+  async function fetchCartForProfile() {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      const res = await fetch("/api/cart/", {
+        headers: {
+          "Authorization": `Token ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+      const data = await res.json();
+      renderProfileCart(data.items);
+    } catch (err) {
+      console.error("Error loading profile cart:", err);
+      const profileCartList = document.querySelector(".cart-items");
+      if (profileCartList) profileCartList.innerHTML = `<li>Could not load cart ❌</li>`;
+    }
+  }
+
+  // Init both on DOM load
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchOrders();
+    fetchCartForProfile();
+  });
 </script>
 
 </html>

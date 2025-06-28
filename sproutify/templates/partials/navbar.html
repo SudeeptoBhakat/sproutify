@@ -1,0 +1,48 @@
+{% load static %}
+<header>
+    <figure class="logo"><a href="/">
+        <img src="{% static 'images/logo1.0.png' %}" alt="" style="padding-left: 10px;"></a>
+    </figure>
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <label for="menu-toggle" class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </label>
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li><a href="#"><strong>Bestseller</strong></a></li>
+            <li><a href="#"><strong>Deal of the day</strong></a></li>
+            <li><a href="#"><strong>Category</strong></a></li>
+            <li class="search-form">
+                <form class="form" id="searchForm">
+                    <!-- <button type="submit" class="search-btn"> -->
+                    <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <!-- </button> -->
+                    <input id="searchInput" class="input" autocomplete="off" placeholder="Search for a plant..."
+                        required type="text">
+                </form>
+                <ul id="suggestions" class="suggestions-list"></ul>
+            </li>
+            <li>
+                <div id="userMenuContainer"><a herf="#" id="loginBtn" style="cursor: pointer;"><svg width="20"
+                            height="20" fill="currentColor">
+                            <path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z" />
+                        </svg> Account</a></div>
+            </li>
+
+            <li><a href="#" class="cart-view-btn"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                        width="20px" height="20px" viewBox="0 0 52 52">
+                        <g>
+                            <path
+                                d="M20.1,26H44c0.7,0,1.4-0.5,1.5-1.2l4.4-15.4c0.3-1.1-0.5-2-1.5-2H11.5l-0.6-2.3c-0.3-1.1-1.3-1.8-2.3-1.8H4.6c-1.3,0-2.5,1-2.6,2.3C1.9,7,3.1,8.2,4.4,8.2h2.3l7.6,25.7c0.3,1.1,1.2,1.8,2.3,1.8h28.2c1.3,0,2.5-1,2.6-2.3c0.1-1.4-1.1-2.6-2.4-2.6H20.2c-1.1,0-2-0.7-2.3-1.7v-0.1C17.4,27.5,18.6,26,20.1,26z" />
+                            <circle cx="20.6" cy="44.6" r="4" />
+                            <circle cx="40.1" cy="44.6" r="4" />
+                        </g>
+                    </svg> Cart</a></li>
+        </ul>
+    </nav>
+</header>

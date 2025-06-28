@@ -24,6 +24,16 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('order', 'product', 'quantity', 'price_at_order', 'total_price')
+    readonly_fields = ('order', 'product', 'quantity', 'price_at_order', 'total_price')
+
+    # def has_add_permission(self, request):
+    #     return False  # Disable adding new order items from admin
+
+    # def has_change_permission(self, request, obj=None):
+    #     return False  # Disable editing order items
+
+    # def has_delete_permission(self, request, obj=None):
+    #     return False  # Optional: disable deletion
 
 
 @admin.register(PaymentMethod)

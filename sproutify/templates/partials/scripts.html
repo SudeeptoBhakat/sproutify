@@ -1,0 +1,396 @@
+<script>
+    // ===========================
+    //  Sticky Header on Scroll
+    // ===========================
+    window.addEventListener("scroll", () => {
+        const header = document.querySelector("header");
+        header.classList.toggle("scrolled", window.scrollY > 200);
+    });
+
+    // ===========================
+    //  Footer Accordion Toggle
+    // ===========================
+    const footerToggles = document.querySelectorAll(".footer-toggle");
+
+    if (window.innerWidth <= 768) {
+        footerToggles.forEach(toggle => {
+            toggle.addEventListener("click", () => {
+                toggle.parentElement.classList.toggle("active");
+            });
+        });
+    }
+
+    // ===========================
+    //  Fade-In on Scroll
+    // ===========================
+    const faders = document.querySelectorAll(".fade-in-section");
+
+    const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: "0px 0px -20px 0px"
+    });
+
+    faders.forEach(fader => appearOnScroll.observe(fader));
+
+    // ===========================
+    //  Preloader Logic
+    // ===========================
+    window.addEventListener("load", () => {
+        const preloader = document.getElementById("preloader");
+        preloader.style.opacity = "0";
+        setTimeout(() => {
+            preloader.style.display = "none";
+        }, 500);
+    });
+
+
+    // ===========================
+    //  Login Popup Shows
+    // ===========================
+    document.addEventListener("DOMContentLoaded", function () {
+        const loginPopup = document.getElementById("loginPopup");
+        const registerPopup = document.getElementById("registerPopup");
+
+        const loginBtn = document.getElementById("loginBtn");
+        const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+        const registerCloseBtn = document.getElementById("registerCloseBtn");
+        const showRegisterBtn = document.getElementById("showRegisterBtn");
+        const showLoginBtn = document.getElementById("showLoginBtn");
+
+        // Show Login
+        loginBtn?.addEventListener("click", () => {
+            loginPopup.classList.remove("hidden");
+        });
+
+        // Close Login
+        loginCloseBtn?.addEventListener("click", () => {
+            loginPopup.classList.add("hidden");
+        });
+
+        // Show Register from Login
+        showRegisterBtn?.addEventListener("click", () => {
+            loginPopup.classList.add("hidden");
+            registerPopup.classList.remove("hidden");
+        });
+
+        // Show Login from Register
+        showLoginBtn?.addEventListener("click", () => {
+            registerPopup.classList.add("hidden");
+            loginPopup.classList.remove("hidden");
+        });
+
+        // Close Register
+        registerCloseBtn?.addEventListener("click", () => {
+            registerPopup.classList.add("hidden");
+        });
+    });
+</script>
+
+<script>
+    // ✅ Add to Cart Function
+    function handleAddToCart(e) {
+        const btn = e.target.closest(".add-to-cart-btn");
+        if (!btn) return;
+
+        const authToken = localStorage.getItem("authToken");
+        console.log(authToken);
+        if (!authToken) return loginPopup?.classList.remove("hidden");
+
+        fetch("/cart/add/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Token ${authToken}`,
+            },
+            body: JSON.stringify({ product_id: btn.dataset.productId, quantity: parseInt(e.target.dataset.qty) || qty }),
+        })
+            .then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) {
+                    console.error("Server error:", data);
+                    throw new Error(data.detail || "Failed to add to cart.");
+                }
+                showToast("Product added to cart!", "success");;
+                // window.location.href = "/cart/";
+            })
+            .catch((err) => {
+                console.error("Add to cart failed", err);
+                showToast("Failed to add product!", "error");;
+                localStorage.removeItem("authToken");
+                window.location.href = "/login/";
+            });
+    }
+
+    // ✅ Product Fetching
+    function loadProducts() {
+        const container = document.getElementById("productContainer");
+        container.innerHTML = "";
+
+        fetch("/products/")
+            .then((res) => res.ok ? res.json() : Promise.reject("Network error"))
+            .then((products) => {
+                if (!products.length) return (container.innerHTML = "<p>No products available right now.</p>");
+
+                products.forEach((product) => {
+                    const discount = product.discount_price
+                        ? Math.round(((product.price - product.discount_price) / product.price) * 100)
+                        : null;
+                    const priceHtml = `
+          <div class="price-box">
+            <span class="new-price">₹${product.discount_price || product.price}</span>
+            ${product.discount_price ? `<span class="old-price">₹${product.price}</span>` : ""}
+          </div>`;
+
+                    const productCard = document.createElement("div");
+                    productCard.className = "product-card";
+                    productCard.innerHTML = `
+          <a href="/product/${product.id}/">
+            <div class="product-image">
+              ${discount ? `<span class="discount-badge">${discount}% OFF</span>` : ""}
+              <img src="${product.image || 'images/default.jpg'}" alt="${product.name}" />
+            </div>
+            <div class="product-details">
+              <h4 class="product-name">${product.name}</h4>
+              <p class="product-quantity">${product.pot_size || '1 piece'}</p>
+              ${priceHtml}
+              <div class="rating">⭐⭐⭐⭐☆</div>
+            </a>
+              <div class="action-buttons">
+                <button class="btn primary-btn add-to-cart-btn" data-product-id="${product.id}" data-qty="1">Add to Cart</button>
+                <button class="btn secondary-btn">Buy Now</button>
+              </div>
+            </div>`;
+                    container.appendChild(productCard);
+                });
+            })
+            .catch((err) => {
+                console.error("Failed to fetch products", err);
+                container.innerHTML = "<p>Unable to load products. Please try again later.</p>";
+            });
+    }
+
+    // ✅ Login Form Handling
+    function initLogin() {
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.getElementById("loginBtn");
+        const userMenuContainer = document.getElementById("userMenuContainer");
+
+        const renderUserDropdown = (firstName = "User") => {
+            userMenuContainer.innerHTML = `
+      <div class="dropdown">
+        <a class="dropdown-toggle" id="userDropdown">
+          <svg width="20" height="20" fill="currentColor"><path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z"/></svg> ${firstName}
+        </a>
+        <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+          <a href="/profile">Profile</a>
+          <a href="#" id="logoutBtn">Logout</a>
+        </div>
+      </div>`;
+
+            document.getElementById("userDropdown").addEventListener("click", () => {
+                const menu = document.getElementById("dropdownMenu");
+                menu.style.display = menu.style.display === "none" ? "block" : "none";
+            });
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userData");
+                window.location.href = "/";
+            });
+        };
+
+        const validateToken = async () => {
+            const token = localStorage.getItem("authToken");
+            if (!token) return loginBtn.innerHTML = `<svg width="20" height="20" fill="currentColor"><path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z"/></svg> Login`;
+
+            try {
+                const res = await fetch("/api/validate-token/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Invalid token");
+
+                const data = await res.json();
+                renderUserDropdown(data.first_name);
+            } catch (err) {
+                console.warn("Token validation failed:", err);
+            }
+        };
+
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById("identifier").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const payload = identifier.includes("@") ? { email: identifier, password } : { phone: identifier, password };
+
+            try {
+                const res = await fetch("/api/login/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await res.json();
+                if (!res.ok) return showToast("Failed to Login!", "error");;
+
+                // Clear previous data (optional safety)
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("userData");
+
+                // Store fresh data
+                localStorage.setItem("authToken", result.token);
+                // localStorage.setItem("userData", JSON.stringify(result.user));
+
+                showToast("Product added to cart!", "success");
+
+                // Reload for full cart/session sync
+                setTimeout(() => window.location.reload(), 500);
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("Something went wrong!");
+            }
+        }
+
+        //     const handleLogin = async (e) => {
+        //         e.preventDefault();
+        //         const identifier = document.getElementById("identifier").value.trim();
+        //         const password = document.getElementById("password").value.trim();
+        //         const payload = identifier.includes("@") ? { email: identifier, password } : { phone: identifier, password };
+
+        //         try {
+        //             const res = await fetch("/api/login/", {
+        //                 method: "POST",
+        //                 headers: { "Content-Type": "application/json" },
+        //                 body: JSON.stringify(payload),
+        //             });
+
+        //             const result = await res.json();
+        //             if (!res.ok) return alert(result.detail || "Login failed");
+
+        //             localStorage.setItem("authToken", result.token);
+        //             renderUserDropdown(result.user.first_name);
+        //             alert("Login successful!");
+        //             loginPopup && (loginPopup.style.display = "none");
+        //         } catch (err) {
+        //             console.error("Login error:", err);
+        //             alert("Something went wrong!");
+        //         }
+        //     };
+
+        loginForm?.addEventListener("submit", handleLogin);
+        validateToken();
+    }
+
+    // ✅ Registration Form Handling
+    function initRegistration() {
+        const registerForm = document.getElementById("registerForm");
+        if (!registerForm) return;
+
+        registerForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const data = {
+                first_name: document.getElementById("firstName").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                password: document.getElementById("registerPassword").value,
+            };
+
+            fetch("/user/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify(data),
+            })
+                .then((res) => res.ok ? res.json() : Promise.reject(res))
+                .then((data) => {
+                    // showToast(data.message, "success" || data.error, "error");
+                    alert(data.message || data.error);
+                    if (data.message) location.reload();
+                })
+                .catch((err) => alert("Something went wrong: " + err));
+        });
+
+        function getCookie(name) {
+            return document.cookie
+                .split(";")
+                .map(c => c.trim())
+                .find(c => c.startsWith(name + "="))
+                ?.split("=")[1];
+        }
+    }
+
+    // ✅ Search Suggestion
+    function initSearch() {
+        const input = document.getElementById("searchInput");
+        const suggestions = document.getElementById("suggestions");
+
+        if (!input || !suggestions) return;
+
+        let timer;
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            const val = input.value.trim();
+            suggestions.innerHTML = "";
+            suggestions.style.display = "none";
+
+            if (val.length < 2) return;
+
+            timer = setTimeout(() => {
+                fetch(`/api/products/search/?q=${encodeURIComponent(val)}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.length > 0) {
+                            suggestions.innerHTML = data.map(p => `<li data-id="${p.id}">${p.name}</li>`).join("");
+                            suggestions.style.display = "block";
+                        }
+                    })
+                    .catch(() => suggestions.style.display = "none");
+            }, 300);
+        });
+
+        suggestions.addEventListener("click", (e) => {
+            if (e.target.tagName === "LI") {
+                window.location.href = `/product/${e.target.dataset.id}/`;
+            }
+        });
+    }
+
+    // ✅ Cart View Button
+    function handleCartView(e) {
+        const btn = e.target.closest(".cart-view-btn");
+        if (!btn) return;
+
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return loginPopup?.classList.remove("hidden");
+
+        window.location.href = "/cart/";
+    }
+
+    function toggleDrawer() {
+        const drawer = document.getElementById("mobileDrawer");
+        drawer.classList.toggle("open");
+    }
+
+</script>
+
+<script>
+    // document.getElementById("logoutBtn").addEventListener("click", () => {
+    //     localStorage.removeItem("authToken");
+    //     localStorage.removeItem("userData");
+    //     window.location.href = "/";
+    // });
+
+</script>

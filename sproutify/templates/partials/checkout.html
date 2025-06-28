@@ -1,0 +1,791 @@
+<!-- Razorpay SDK -->
+<style>
+    /* Overlay */
+    .address-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Modal */
+    .address-modal {
+        background: #fefefe;
+        padding: 2rem;
+        border-radius: 1rem;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeSlideUp 0.3s ease forwards;
+        position: relative;
+    }
+
+    /* Close button */
+    .close-btn {
+        position: absolute;
+        top: 0.8rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        transition: color 0.2s ease;
+    }
+
+    .close-btn:hover {
+        color: #2e7d32;
+    }
+
+    /* Inputs */
+    #shippingForm input {
+        display: block;
+        width: 100%;
+        margin-bottom: 1rem;
+        padding: 0.8rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border 0.3s ease;
+    }
+
+    #shippingForm input:focus {
+        border-color: #2e7d32;
+        outline: none;
+    }
+
+    /* Button */
+    .submit-btn {
+        background: #2e7d32;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        font-size: 1rem;
+        border-radius: 8px;
+        width: 100%;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background: #1b5e20;
+    }
+
+    /* Animation */
+    @keyframes fadeSlideUp {
+        0% {
+            transform: translateY(40px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+<!-- Address Edit Modal -->
+<div class="address-modal-overlay" id="addressModal">
+    <div class="address-modal">
+        <span class="close-btn" id="closeModal">&times;</span>
+        <h2>Edit Shipping Address</h2>
+        <form id="shippingForm">
+            <input type="text" id="shipping_full_name" placeholder="Full Name" required />
+            <input type="tel" id="shipping_phone" placeholder="Phone Number" required />
+            <input type="text" id="shipping_state" placeholder="State" required />
+            <input type="text" id="shipping_district" placeholder="District" required />
+            <input type="text" id="shipping_address_line1" placeholder="Address Line 1" required />
+            <input type="text" id="shipping_street" placeholder="Street" required />
+            <input type="text" id="shipping_pin_code" placeholder="PIN Code" required />
+
+            <button type="submit" class="submit-btn">Save Address</button>
+        </form>
+    </div>
+</div>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) {
+            alert("Please login to view your cart.");
+            return window.location.href = "/login/";
+        }
+
+        const cartContainer = document.querySelector(".cart-items");
+        const summaryContainer = document.querySelector(".order-summary");
+
+        if (!cartContainer || !summaryContainer) {
+            console.error("Missing required containers in HTML.");
+            return;
+        }
+
+        let userData = {}; // Will hold the fetched user object
+
+        const renderCart = (data) => {
+            userData = data.user;
+
+            if (!data.items || data.items.length === 0) {
+                cartContainer.innerHTML = `<p>Your cart is empty. Start adding some beautiful plants! 🌿</p>`;
+                summaryContainer.innerHTML = "";
+                renderShippingAddress(userData);
+                return;
+            }
+
+            cartContainer.innerHTML = data.items.map(item => `
+            <div class="cart-item" data-item-id="${item.id}">
+                <img src="/media/${item.product_image}" alt="${item.product_name}" class="product-img" />
+                <div class="item-details">
+                    <h2>${item.product_name}</h2>
+                    <p>Size: ${item.pot_size || "Standard"} | ₹${item.price_at_time}</p>
+                    <p>Estimated Delivery: <strong>${data.delivery_start} - ${data.delivery_end}</strong></p>
+                    <div class="qty-control">
+                        <button class="qty-btn decrease">−</button>
+                        <span class="qty">${item.quantity}</span>
+                        <button class="qty-btn increase">+</button>
+                    </div>
+                    <button class="remove">🗑 Remove</button>
+                </div>
+                <div class="item-price">₹${item.total_price}</div>
+            </div>
+        `).join("");
+
+            summaryContainer.innerHTML = `
+            <h3>Order Summary</h3>
+            <div class="summary-row"><span>Subtotal</span><span>₹${data.total}</span></div>
+            <div class="summary-row"><span>Shipping</span><span>Free</span></div>
+            <div class="summary-row"><span>Discount</span><span>₹${data.discount}</span></div>
+            <hr>
+            <div class="summary-row total"><strong>Total</strong><strong id="finalTotal">₹${data.final_total}</strong></div>
+            <button class="checkout-btn">Proceed to Checkout</button>
+            <div class="secure-msg">🔒 Secure payment gateway</div>
+        `;
+
+            renderShippingAddress(userData);
+            bindCheckoutButton(); // Call Razorpay bind after DOM rendered
+        };
+
+        const fetchAndRenderCart = async () => {
+            try {
+                const res = await fetch("/api/cart/", {
+                    headers: {
+                        "Authorization": `Token ${authToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch cart");
+                const data = await res.json();
+                console.log(data);
+                renderCart(data);
+
+            } catch (err) {
+                console.error("Error loading cart:", err);
+                cartContainer.innerHTML = "<p>Unable to load cart. Please try again later.</p>";
+            }
+        };
+
+        const updateCartItem = async (itemId, action) => {
+            try {
+                const res = await fetch(`/cart/update/${itemId}/`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${authToken}`,
+                    },
+                    body: JSON.stringify({ quantity_action: action }),
+                });
+                if (!res.ok) throw new Error("Update failed");
+                await fetchAndRenderCart();
+            } catch (err) {
+                console.error("Update error:", err);
+                alert("Could not update quantity.");
+            }
+        };
+
+        const deleteCartItem = async (itemId) => {
+            try {
+                const res = await fetch(`/cart/delete/${itemId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Token ${authToken}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Delete failed");
+                await fetchAndRenderCart();
+            } catch (err) {
+                console.error("Delete error:", err);
+                alert("Failed to remove item.");
+            }
+        };
+
+        cartContainer.addEventListener("click", (e) => {
+            const itemElem = e.target.closest(".cart-item");
+            if (!itemElem) return;
+
+            const itemId = itemElem.dataset.itemId;
+
+            if (e.target.classList.contains("increase")) {
+                updateCartItem(itemId, "increase");
+            } else if (e.target.classList.contains("decrease")) {
+                updateCartItem(itemId, "decrease");
+            } else if (e.target.classList.contains("remove")) {
+                if (confirm("Are you sure you want to remove this item?")) {
+                    deleteCartItem(itemId);
+                }
+            }
+        });
+
+        const bindCheckoutButton = () => {
+            const btn = document.querySelector(".checkout-btn");
+            if (!btn) return;
+
+            btn.addEventListener("click", async () => {
+                const total = parseFloat(document.getElementById("finalTotal").innerText.replace("₹", "").trim());
+                const shippinginfo = JSON.parse(sessionStorage.getItem("shippingAddress"));
+
+                const isValidShipping = shippinginfo &&
+                    shippinginfo.full_name &&
+                    shippinginfo.street &&
+                    shippinginfo.address_line1 &&
+                    shippinginfo.district &&
+                    shippinginfo.state &&
+                    shippinginfo.pin_code &&
+                    shippinginfo.phone;
+
+                if (!isValidShipping) {
+                    showToast("Please complete your shipping address before proceeding.", "error");
+                    document.getElementById("addressModal").style.display = "flex";
+                    return;
+                }
+
+                // 🛒 Collect cart item details from DOM
+                const cartElements = document.querySelectorAll(".cart-item");
+                const cart = Array.from(cartElements).map(itemEl => {
+                    const productId = parseInt(itemEl.dataset.itemId); // Make sure this is added in HTML
+                    // console.log("Product ID:", productId);
+                    const price = parseFloat(itemEl.querySelector(".item-price").innerText.replace("₹", "").trim());
+                    const quantity = parseInt(itemEl.querySelector(".qty").innerText.trim());
+
+                    return { product_id: productId, quantity, price };
+                });
+
+                if (!cart.length) {
+                    showToast("Your cart is empty.", "error");
+                    return;
+                }
+
+                const shipping = {
+                    full_name: shippinginfo.full_name,
+                    phone: shippinginfo.phone,
+                    state: shippinginfo.state,
+                    district: shippinginfo.district,
+                    address_line1: shippinginfo.address_line1,
+                    street: shippinginfo.street,
+                    pin_code: shippinginfo.pin_code,
+                };
+                console.log(cart)
+                const payload = {
+                    cart,
+                    shipping,
+                    amount: total,
+                    notes: shippinginfo.notes || ""
+                };
+
+                try {
+                    const paymentRes = await fetch("/api/create-razorpay-order/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Token ${authToken}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const paymentData = await paymentRes.json();
+                    if (!paymentData.order_id) {
+                        return showToast("Payment initiation failed.", "error");
+                    }
+
+                    const razorpay = new Razorpay({
+                        key: paymentData.razorpay_key,
+                        amount: paymentData.amount,
+                        currency: "INR",
+                        name: "Sproutify",
+                        description: "Nursery Plants Purchase",
+                        order_id: paymentData.order_id,
+                        handler: async function (response) {
+                            const verifyRes = await fetch("/api/verify-payment/", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Token ${authToken}`
+                                },
+                                body: JSON.stringify({
+                                    ...response,
+                                    order_db_id: paymentData.order_db_id
+                                })
+                            });
+
+                            const verifyData = await verifyRes.json();
+                            if (verifyRes.ok) {
+                                alert("✅ Payment Successful!");
+                                window.location.href = "/order-success/";
+                            } else {
+                                alert("❌ Payment verification failed: " + (verifyData.error || "Unknown error"));
+                            }
+                        },
+                        prefill: {
+                            name: shipping.full_name,
+                            contact: shipping.phone
+                        },
+                        theme: {
+                            color: "#27ae60"
+                        }
+                    });
+
+                    razorpay.open();
+
+                } catch (error) {
+                    console.error("Razorpay Init Error:", error);
+                    alert("Something went wrong. Try again later.");
+                }
+            });
+        };
+
+        fetchAndRenderCart(); // Initial load
+    });
+</script>
+
+<!-- Address Logic -->
+<script>
+    function renderShippingAddress(user) {
+        const addressBlock = document.querySelector(".address-block");
+        if (!addressBlock) return;
+
+        const shippingData = JSON.parse(sessionStorage.getItem("shippingAddress"));
+
+        const data = shippingData || {
+            full_name: `${user.first_name} ${user.last_name}`,
+            street: user.street,
+            address_line1: user.address_line1,
+            district: user.district,
+            state: user.state,
+            pin_code: user.pin_code,
+            phone: user.phone
+        };
+
+        addressBlock.innerHTML = `
+        <h3>Shipping To:</h3>
+        <p>
+            ${data.full_name}<br>
+            ${data.street}, ${data.address_line1}, ${data.district}, ${data.state}<br>
+            Pincode: ${data.pin_code}<br>
+            Phone: ${data.phone}
+        </p>
+        <a href="#" class="edit-address-btn">Edit</a>
+    `;
+    }
+</script>
+
+<!-- Modal Controls -->
+<script>
+    document.body.addEventListener("click", function (e) {
+        if (e.target.matches(".edit-address-btn")) {
+            e.preventDefault();
+            document.getElementById("addressModal").style.display = "flex";
+        }
+        if (e.target.matches("#closeModal")) {
+            e.preventDefault();
+            document.getElementById("addressModal").style.display = "none";
+        }
+    });
+</script>
+
+<!-- Shipping Form Handler -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const addressForm = document.getElementById("shippingForm");
+        if (!addressForm) return;
+
+        addressForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const shippingAddress = {
+                full_name: document.getElementById("shipping_full_name").value,
+                phone: document.getElementById("shipping_phone").value,
+                state: document.getElementById("shipping_state").value,
+                district: document.getElementById("shipping_district").value,
+                address_line1: document.getElementById("shipping_address_line1").value,
+                street: document.getElementById("shipping_street").value,
+                pin_code: document.getElementById("shipping_pin_code").value,
+            };
+
+            sessionStorage.setItem("shippingAddress", JSON.stringify(shippingAddress));
+            document.getElementById("addressModal").style.display = "none";
+
+            renderShippingAddress(shippingAddress);
+        });
+    });
+</script>
+
+
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+
+
+<script>
+    // ===========================
+    //  Sticky Header on Scroll
+    // ===========================
+    window.addEventListener("scroll", () => {
+        const header = document.querySelector("header");
+        header.classList.toggle("scrolled", window.scrollY > 200);
+    });
+
+    // ===========================
+    //  Footer Accordion Toggle
+    // ===========================
+    const footerToggles = document.querySelectorAll(".footer-toggle");
+
+    if (window.innerWidth <= 768) {
+        footerToggles.forEach(toggle => {
+            toggle.addEventListener("click", () => {
+                toggle.parentElement.classList.toggle("active");
+            });
+        });
+    }
+
+    // ===========================
+    //  Fade-In on Scroll
+    // ===========================
+    const faders = document.querySelectorAll(".fade-in-section");
+
+    const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: "0px 0px -20px 0px"
+    });
+
+    faders.forEach(fader => appearOnScroll.observe(fader));
+
+    // ===========================
+    //  Preloader Logic
+    // ===========================
+    window.addEventListener("load", () => {
+        const preloader = document.getElementById("preloader");
+        preloader.style.opacity = "0";
+        setTimeout(() => {
+            preloader.style.display = "none";
+        }, 500);
+    });
+
+
+    // ===========================
+    //  Login Popup Shows
+    // ===========================
+    document.addEventListener("DOMContentLoaded", function () {
+        const loginPopup = document.getElementById("loginPopup");
+        const registerPopup = document.getElementById("registerPopup");
+
+        const loginBtn = document.getElementById("loginBtn");
+        const loginCloseBtn = document.getElementById("loginCloseBtn");
+
+        const registerCloseBtn = document.getElementById("registerCloseBtn");
+        const showRegisterBtn = document.getElementById("showRegisterBtn");
+        const showLoginBtn = document.getElementById("showLoginBtn");
+
+        // Show Login
+        loginBtn?.addEventListener("click", () => {
+            loginPopup.classList.remove("hidden");
+        });
+
+        // Close Login
+        loginCloseBtn?.addEventListener("click", () => {
+            loginPopup.classList.add("hidden");
+        });
+
+        // Show Register from Login
+        showRegisterBtn?.addEventListener("click", () => {
+            loginPopup.classList.add("hidden");
+            registerPopup.classList.remove("hidden");
+        });
+
+        // Show Login from Register
+        showLoginBtn?.addEventListener("click", () => {
+            registerPopup.classList.add("hidden");
+            loginPopup.classList.remove("hidden");
+        });
+
+        // Close Register
+        registerCloseBtn?.addEventListener("click", () => {
+            registerPopup.classList.add("hidden");
+        });
+    });
+</script>
+
+<script>
+    // ✅ Add to Cart Function
+    function handleAddToCart(e) {
+        const btn = e.target.closest(".add-to-cart-btn");
+        if (!btn) return;
+
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return loginPopup?.classList.remove("hidden");
+
+        fetch("/cart/add/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Token ${authToken}`,
+            },
+            body: JSON.stringify({ product_id: btn.dataset.productId, quantity: parseInt(e.target.dataset.qty) || qty }),
+        })
+            .then((res) => res.json())
+            .then(() => {
+                showToast("Product added to cart!", "success");
+                window.location.href = "/cart/";
+            })
+            .catch((err) => {
+                console.error("Add to cart failed", err);
+                showToast("Failed to add product!", "error");
+            });
+    }
+
+    // ✅ Product Fetching
+    function loadProducts() {
+        const container = document.getElementById("productContainer");
+        container.innerHTML = "";
+
+        fetch("/products/")
+            .then((res) => res.ok ? res.json() : Promise.reject("Network error"))
+            .then((products) => {
+                if (!products.length) return (container.innerHTML = "<p>No products available right now.</p>");
+
+                products.forEach((product) => {
+                    const discount = product.discount_price
+                        ? Math.round(((product.price - product.discount_price) / product.price) * 100)
+                        : null;
+                    const priceHtml = `
+          <div class="price-box">
+            <span class="new-price">₹${product.discount_price || product.price}</span>
+            ${product.discount_price ? `<span class="old-price">₹${product.price}</span>` : ""}
+          </div>`;
+
+                    const productCard = document.createElement("div");
+                    productCard.className = "product-card";
+                    productCard.innerHTML = `
+          <a href="/product/${product.id}/">
+            <div class="product-image">
+              ${discount ? `<span class="discount-badge">${discount}% OFF</span>` : ""}
+              <img src="${product.image || 'images/default.jpg'}" alt="${product.name}" />
+            </div>
+            <div class="product-details">
+              <h4 class="product-name">${product.name}</h4>
+              <p class="product-quantity">${product.pot_size || '1 piece'}</p>
+              ${priceHtml}
+              <div class="rating">⭐⭐⭐⭐☆</div>
+            </a>
+              <div class="action-buttons">
+                <button class="btn primary-btn add-to-cart-btn" data-product-id="${product.id}" data-qty="1">Add to Cart</button>
+                <button class="btn secondary-btn">Buy Now</button>
+              </div>
+            </div>`;
+                    container.appendChild(productCard);
+                });
+            })
+            .catch((err) => {
+                console.error("Failed to fetch products", err);
+                container.innerHTML = "<p>Unable to load products. Please try again later.</p>";
+            });
+    }
+
+    // ✅ Login Form Handling
+    function initLogin() {
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.getElementById("loginBtn");
+        const userMenuContainer = document.getElementById("userMenuContainer");
+
+        const renderUserDropdown = (firstName = "User") => {
+            userMenuContainer.innerHTML = `
+      <div class="dropdown">
+        <a class="dropdown-toggle" id="userDropdown">
+          <svg width="20" height="20" fill="currentColor"><path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z"/></svg> ${firstName}
+        </a>
+        <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+          <a href="/profile">Profile</a>
+          <a href="#" id="logoutBtn">Logout</a>
+        </div>
+      </div>`;
+
+            document.getElementById("userDropdown").addEventListener("click", () => {
+                const menu = document.getElementById("dropdownMenu");
+                menu.style.display = menu.style.display === "none" ? "block" : "none";
+            });
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.removeItem("authToken");
+                window.location.href = "/";
+            });
+        };
+
+        const validateToken = async () => {
+            const token = localStorage.getItem("authToken");
+            if (!token) return loginBtn.innerHTML = `<svg width="20" height="20" fill="currentColor"><path d="M5 7a5 5 0 1110 0A5 5 0 015 7zM2 18c0-3 4-5 8-5s8 2 8 5v1H2v-1z"/></svg> Login`;
+
+            try {
+                const res = await fetch("/api/validate-token/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Invalid token");
+
+                const data = await res.json();
+                renderUserDropdown(data.first_name);
+            } catch (err) {
+                console.warn("Token validation failed:", err);
+            }
+        };
+
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById("identifier").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const payload = identifier.includes("@") ? { email: identifier, password } : { phone: identifier, password };
+
+            try {
+                const res = await fetch("/api/login/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await res.json();
+                if (!res.ok) return alert(result.detail || "Login failed");
+
+                localStorage.setItem("authToken", result.token);
+                renderUserDropdown(result.user.first_name);
+                showToast("Login successful!", "success");
+                loginPopup && (loginPopup.style.display = "none");
+            } catch (err) {
+                console.error("Login error:", err);
+                showToast("Something went wrong!", "error");
+            }
+        };
+
+        loginForm?.addEventListener("submit", handleLogin);
+        validateToken();
+    }
+
+    // ✅ Registration Form Handling
+    function initRegistration() {
+        const registerForm = document.getElementById("registerForm");
+        if (!registerForm) return;
+
+        registerForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const data = {
+                first_name: document.getElementById("firstName").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                password: document.getElementById("registerPassword").value,
+            };
+
+            fetch("/user/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify(data),
+            })
+                .then((res) => res.ok ? res.json() : Promise.reject(res))
+                .then((data) => {
+                    alert(data.message || data.error);
+                    if (data.message) location.reload();
+                })
+                .catch((err) => alert("Something went wrong: " + err));
+        });
+
+        function getCookie(name) {
+            return document.cookie
+                .split(";")
+                .map(c => c.trim())
+                .find(c => c.startsWith(name + "="))
+                ?.split("=")[1];
+        }
+    }
+
+    // ✅ Search Suggestion
+    function initSearch() {
+        const input = document.getElementById("searchInput");
+        const suggestions = document.getElementById("suggestions");
+
+        if (!input || !suggestions) return;
+
+        let timer;
+        input.addEventListener("input", () => {
+            clearTimeout(timer);
+            const val = input.value.trim();
+            suggestions.innerHTML = "";
+            suggestions.style.display = "none";
+
+            if (val.length < 2) return;
+
+            timer = setTimeout(() => {
+                fetch(`/api/products/search/?q=${encodeURIComponent(val)}`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.length > 0) {
+                            suggestions.innerHTML = data.map(p => `<li data-id="${p.id}">${p.name}</li>`).join("");
+                            suggestions.style.display = "block";
+                        }
+                    })
+                    .catch(() => suggestions.style.display = "none");
+            }, 300);
+        });
+
+        suggestions.addEventListener("click", (e) => {
+            if (e.target.tagName === "LI") {
+                window.location.href = `/product/${e.target.dataset.id}/`;
+            }
+        });
+    }
+
+    // ✅ Cart View Button
+    function handleCartView(e) {
+        const btn = e.target.closest(".cart-view-btn");
+        if (!btn) return;
+
+        const authToken = localStorage.getItem("authToken");
+        if (!authToken) return loginPopup?.classList.remove("hidden");
+
+        window.location.href = "/cart/";
+    }
+
+    // ✅ Master event listeners
+    window.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("click", handleAddToCart);
+        document.addEventListener("click", handleCartView);
+        // loadProducts();
+        initLogin();
+        initRegistration();
+        initSearch();
+    });
+
+</script>

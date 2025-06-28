@@ -5,17 +5,22 @@ from .models import Cart, Order, OrderItem, PaymentMethod, Payment, Invoice, Ord
 class CartSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    product_image = serializers.CharField(source='product.image', read_only=True)
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'product', 'product_name', 'product_price', 'quantity', 'price_at_time', 'total_price', 'order_status', 'notes', 'added_at']
+        fields = ['id', 'user', 'product','product_image', 'product_name', 'product_price', 'quantity', 'price_at_time', 'total_price', 'order_status', 'notes', 'added_at']
         read_only_fields = ['user', 'price_at_time', 'total_price', 'added_at']
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_image = serializers.ImageField(source='product.image', read_only=True)
+
     class Meta:
         model = OrderItem
-        fields = ['product', 'quantity', 'price_at_order', 'total_price']
+        fields = ['product_id', 'product_name', 'product_image', 'quantity', 'price_at_order', 'total_price']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)

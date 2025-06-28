@@ -1,250 +1,31 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sproutify - Basket</title>
-    <style>
-        /* Base Styles */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f8f9fa;
-  color: #333;
-  padding: 2rem;
-  margin: 0;
-}
-
-.cart-container {
-  max-width: 1100px;
-  margin: auto;
-}
-
-h1 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #2e7d32;
-}
-
-/* Cart Item Styles */
-.cart-items {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
-  margin-bottom: 2rem;
-}
-
-.cart-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1.2rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 1rem;
-}
-
-.cart-item:last-child {
-  border-bottom: none;
-}
-
-.product-img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 1.5rem;
-}
-
-.item-details {
-  flex: 1;
-}
-
-.item-details h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #1b5e20;
-}
-
-.qty-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.qty-control button {
-  padding: 0.3rem 0.6rem;
-  border: none;
-  background: #e8f5e9;
-  color: #2e7d32;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.qty {
-  width: 30px;
-  text-align: center;
-}
-
-.remove {
-  margin-top: 0.5rem;
-  background: none;
-  border: none;
-  color: #d32f2f;
-  cursor: pointer;
-}
-
-.item-price {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #2e7d32;
-}
-
-/* Summary Section */
-.cart-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.address-block,
-.order-summary {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.04);
-}
-
-.address-block p {
-  margin: 0.5rem 0;
-}
-
-.edit-address {
-  background: none;
-  border: 1px solid #2e7d32;
-  color: #2e7d32;
-  border-radius: 5px;
-  padding: 0.3rem 0.6rem;
-  margin-top: 0.5rem;
-  cursor: pointer;
-}
-
-.order-summary h3 {
-  margin-bottom: 1rem;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.total {
-  font-size: 1.2rem;
-}
-
-.checkout-btn {
-  width: 100%;
-  background: #2e7d32;
-  color: #fff;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  margin-top: 1rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.checkout-btn:hover {
-  background: #1b5e20;
-}
-
-.secure-msg {
-  text-align: center;
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-  .cart-summary {
-    flex-direction: row;
-    gap: 2rem;
-  }
-
-  .address-block,
-  .order-summary {
-    width: 50%;
-  }
-}
-
-.checkout-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 2rem 0 3rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  text-align: center;
-  min-width: 70px;
-}
-
-.step .circle {
-  width: 32px;
-  height: 32px;
-  background: #c8e6c9;
-  color: #2e7d32;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.step.active .circle,
-.step.completed .circle {
-  background: #2e7d32;
-  color: white;
-}
-
-.step .label {
-  margin-top: 0.3rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.step.completed .label {
-  color: #2e7d32;
-  font-weight: 600;
-}
-
-.line {
-  height: 2px;
-  background: #ccc;
-  flex: 1;
-  margin: 0 0.2rem;
-}
-
-.step.completed ~ .line {
-  background: #2e7d32;
-}
-
-    </style>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/basket.css' %}">
 </head>
 <body>
+  <!-- LOGIN POPUP -->
+  {% include 'partials/login_popup.html' %}
+  <!-- REGISTER POPUP -->
+  {% include 'partials/register_popup.html' %}
+
+  <!-- preloader -->
+  {% include 'partials/preloader.html' %}
+
+  <!-- Whatsapp logo -->
+  {% include "partials/whatsapp.html" %}
+
+  <!-- navbar -->
+  {% include 'partials/navbar.html' %}
+
 <!-- Smart Cart Page Layout -->
 <div class="cart-container">
-  <h1>Your Shopping Cart</h1>
       <!-- Checkout Stepper -->
 <div class="checkout-stepper">
   <div class="step active" data-step="1">
@@ -262,26 +43,20 @@ h1 {
     <div class="label">Payment</div>
   </div>
 </div>
-<div class="cart-items"></div>
-<div class="order-summary"></div>
-<div class="address-block"></div>
+<div class="cart-container">
+  <div class="cart-items"></div>
 
-
+  <div class="checkout-section">
+    <div class="address-block"></div>
+    <div class="order-summary"></div>
+  </div>
 </div>
+</div>
+    <!-- Footer -->
+    {% include 'partials/footer.html' %}
 
 </body>
 <script>
-    function increaseQty(button) {
-  const qtySpan = button.parentElement.querySelector(".qty");
-  qtySpan.textContent = parseInt(qtySpan.textContent) + 1;
-}
-
-function decreaseQty(button) {
-  const qtySpan = button.parentElement.querySelector(".qty");
-  let current = parseInt(qtySpan.textContent);
-  if (current > 1) qtySpan.textContent = current - 1;
-}
-
 function setActiveStep(stepNum) {
   const steps = document.querySelectorAll('.step');
   steps.forEach((step, index) => {
@@ -297,184 +72,18 @@ function setActiveStep(stepNum) {
 // Example: Move to delivery step
 setActiveStep(2); // 1 = Cart, 2 = Delivery, 3 = Payment
 </script>
+  {% include 'partials/checkout.html' %}
+  {% include 'partials/toast.html' %}
 
-<!-- ✅ Razorpay SDK -->
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const authToken = localStorage.getItem("authToken");
-  if (!authToken) {
-    alert("Please login to view your cart.");
-    return window.location.href = "/login/";
-  }
-
-  try {
-    const res = await fetch("/api/cart/", {
-      headers: {
-        "Authorization": `Token ${authToken}`,
-        "Content-Type": "application/json"
-      }
+  <script>
+    // ✅ Master event listeners
+    window.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("click", handleAddToCart);
+        document.addEventListener("click", handleCartView);
+        // loadProducts();
+        initLogin();
+        initRegistration();
+        initSearch();
     });
-
-    if (!res.ok) throw new Error("Failed to fetch cart data");
-    const data = await res.json();
-
-    const cartContainer = document.querySelector(".cart-items");
-    const summaryContainer = document.querySelector(".order-summary");
-    const addressBlock = document.querySelector(".address-block");
-
-    if (!cartContainer || !summaryContainer || !addressBlock) {
-      console.error("Missing required containers in HTML.");
-      return;
-    }
-
-    if (!data.items || data.items.length === 0) {
-      cartContainer.innerHTML = `<p>Your cart is empty. Start adding some beautiful plants! 🌿</p>`;
-      summaryContainer.innerHTML = "";
-      addressBlock.innerHTML = "";
-      return;
-    }
-
-    // 🛒 Render Cart Items
-    cartContainer.innerHTML = data.items.map(item => `
-      <div class="cart-item">
-        <img src="${item.image}" alt="${item.product_name}" class="product-img" />
-        <div class="item-details">
-          <h2>${item.product_name}</h2>
-          <p>Size: ${item.pot_size || 'Standard'} | ₹${item.price_at_time}</p>
-          <p>Estimated Delivery: <strong>${data.delivery_start} - ${data.delivery_end}</strong></p>
-          <div class="qty-control">
-            <button onclick="updateQuantity(${item.id}, 'decrease')">−</button>
-            <span class="qty">${item.quantity}</span>
-            <button onclick="updateQuantity(${item.id}, 'increase')">+</button>
-          </div>
-          <button class="remove" onclick="removeItem(${item.id})">🗑 Remove</button>
-        </div>
-        <div class="item-price">₹${item.total_price}</div>
-      </div>
-    `).join("");
-
-    // 🧾 Render Summary
-    summaryContainer.innerHTML = `
-      <h3>Order Summary</h3>
-      <div class="summary-row"><span>Subtotal</span><span>₹${data.total}</span></div>
-      <div class="summary-row"><span>Shipping</span><span>Free</span></div>
-      <div class="summary-row"><span>Discount</span><span>₹${data.discount}</span></div>
-      <hr>
-      <div class="summary-row total"><strong>Total</strong><strong id="finalTotal">₹${data.final_total}</strong></div>
-      <button class="checkout-btn">Proceed to Checkout</button>
-      <div class="secure-msg">🔒 Secure payment gateway</div>
-    `;
-
-    // 🚚 Render Shipping Address
-    const user = data.user;
-    addressBlock.innerHTML = `
-      <h3>Shipping To:</h3>
-      <p>
-        ${user.first_name} ${user.last_name}<br>
-        ${user.street}, ${user.address_line1}, ${user.district}, ${user.state}<br>
-        Pincode: ${user.pin_code}
-      </p>
-      <a href="#" class="edit-address">Edit</a>
-    `;
-
-    // 💳 Attach Razorpay Checkout
-    const checkoutBtn = document.querySelector(".checkout-btn");
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", async () => {
-        const total = parseFloat(document.getElementById("finalTotal").innerText.replace("₹", "").trim());
-
-        // Optional: You can get this from user profile or pre-filled form
-      const shippingInfo = {
-          full_name: user?.first_name + " " + user?.last_name,
-          phone: user?.phone || "9999999999",  // fallback if not present
-          state: user?.state || "",
-          district: user?.district || "",
-          address_line1: user?.address_line1 || "",
-          street: user?.street || "",
-          pin: user?.pin_code || "",
-          notes: ""
-        };
-
-        try {
-          const paymentRes = await fetch("/api/create-razorpay-order/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Token ${authToken}`
-            },
-            body: JSON.stringify({
-              amount: total,
-              ...shippingInfo
-            })
-          });
-
-          const paymentData = await paymentRes.json();
-          if (!paymentData.order_id) {
-            return alert("Payment initiation failed.");
-          }
-
-          const razorpay = new Razorpay({
-            key: paymentData.razorpay_key,
-            amount: paymentData.amount,
-            currency: "INR",
-            name: "Sproutify",
-            description: "Nursery Plants Purchase",
-            order_id: paymentData.order_id,
-            handler: async function (response) {
-              const verifyRes = await fetch("/api/verify-payment/", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Token ${authToken}`
-                },
-                body: JSON.stringify({
-                  ...response,
-                  order_db_id: paymentData.order_db_id
-                })
-              });
-
-              const verifyData = await verifyRes.json();
-              if (verifyRes.ok) {
-                alert("✅ Payment Successful!");
-                window.location.href = "/order-success/";
-              } else {
-                alert("❌ Payment verification failed: " + (verifyData.error || "Unknown error"));
-              }
-            },
-            prefill: {
-              name: shippingInfo.full_name,
-              contact: shippingInfo.phone
-            },
-            theme: {
-              color: "#27ae60"
-            }
-          });
-
-          razorpay.open();
-
-        } catch (error) {
-          console.error("Razorpay Init Error:", error);
-          alert("Something went wrong. Try again later.");
-        }
-      });
-    } else {
-      console.warn("Checkout button not found.");
-    }
-
-  } catch (err) {
-    console.error("Cart load error:", err);
-    alert("Something went wrong while loading the cart.");
-    // Optionally:
-    // localStorage.removeItem("authToken");
-    // window.location.href = "/login/";
-  }
-});
-</script>
-
-
-<!-- Payment -->
-
-
+  </script>
 </html>
