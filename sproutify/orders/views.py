@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils.timezone import now
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets
 from .models import Cart, Order, OrderItem, PaymentMethod, Payment, Invoice, OrderTracking
 from .serializers import (
@@ -19,6 +19,10 @@ from .serializers import CartSerializer
 
 def view_cart_page(request):
     return render(request, 'basket.html')
+
+def view_order_page(request):
+    return render(request, 'orders.html')
+
 
 @api_view(['POST'])
 # @permission_classes([permissions.IsAuthenticated])
@@ -269,18 +273,108 @@ def verify_payment(request):
         return Response({"error": "Payment verification failed", "details": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.none()  # avoids router errors
-    serializer_class = OrderSerializer
+from rest_framework.views import APIView
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Order, Payment  # adjust if needed
+from django.utils.timezone import localtime
+
+class OrderAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+    def get(self, request):
+            user = request.user
+            orders = (
+                Order.objects
+                .filter(user=user)
+                .prefetch_related('items', 'items__product')
+                .order_by('-ordered_at')
+            )
+    
+            if not orders.exists():
+                return Response({"error": "No orders found"}, status=404)
+    
+            all_orders = []
+    
+            for order in orders:
+                # Products list
+                products = []
+                for item in order.items.all():
+                    products.append({
+                        "product_id": item.product.id,
+                        "image": item.product.image.url if item.product.image else "",
+                        "name": item.product.name,
+                        "quantity": item.quantity,
+                        "price": float(item.price_at_order)
+                    })
+    
+                # Payment ID
+                payment = Payment.objects.filter(order=order).first()
+                payment_id = payment.transaction_id if payment else None
+    
+                # Final formatted payload for each order
+                order_data = {
+                    "id": order.id,
+                    "products": products,
+                    "shipping": float(order.shipping_charge),
+                    "discount": float(order.discount),
+                    "total": float(order.final_amount),
+                    "status": order.status,
+                    "is_paid": order.is_paid,
+                    "customer": {
+                        "name": order.shipping_full_name,
+                        "phone": order.shipping_phone,
+                        "address": f"{order.shipping_address_line1}, {order.shipping_street}, {order.shipping_district}, {order.shipping_state} - {order.shipping_pin_code}"
+                    },
+                    "paymentId": payment_id,
+                    "date": localtime(order.ordered_at).strftime("%Y-%m-%d")
+                }
+    
+                all_orders.append(order_data)
+    
+            return Response(all_orders, status=200)
 
 
-class OrderItemViewSet(viewsets.ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+
+
+class UserOrderItemsAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        orders = (
+            Order.objects.filter(user=user)
+            .prefetch_related('items', 'items__product')
+            .order_by('-ordered_at')
+        )
+
+        result = []
+        for order in orders:
+            order_data = {
+                "id": order.id,
+                "status": order.status,
+                "final_amount": str(order.final_amount),
+                "ordered_at": localtime(order.ordered_at).isoformat(),
+                "items": []
+            }
+
+            for item in order.items.all():
+                product = item.product
+                order_data["items"].append({
+                    "product_id": product.id,
+                    "product_name": product.name,
+                    "product_image": product.image.url if product.image else "",
+                    "quantity": item.quantity,
+                    "total_price": str(item.total_price)
+                })
+
+            result.append(order_data)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
     queryset = PaymentMethod.objects.all()
@@ -290,10 +384,91 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
-class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
-    serializer_class = InvoiceSerializer
+# class InvoiceViewSet(viewsets.ModelViewSet):
+#     queryset = Invoice.objects.all()
+#     serializer_class = InvoiceSerializer
 
-class OrderTrackingViewSet(viewsets.ModelViewSet):
-    queryset = OrderTracking.objects.all()
-    serializer_class = OrderTrackingSerializer
+class InvoiceDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id):
+        user = request.user
+
+        # Ensure the order belongs to the user
+        order = get_object_or_404(Order, id=order_id, user=user)
+
+        # Ensure the invoice exists for this order
+        try:
+            invoice = order.invoice
+            # print(invoice)
+        except Invoice.DoesNotExist:
+            # print('Hello')
+            return Response({"error": "Invoice not found for this order."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get payment info
+        payment = Payment.objects.filter(order=order).first()
+
+        # Get product details
+        products = []
+        for item in order.items.all():
+            products.append({
+                "product_id": item.product.id,
+                "name": item.product.name,
+                "image": item.product.image.url if item.product.image else "",
+                "quantity": item.quantity,
+                "price": float(item.price_at_order),
+                "total": float(item.total_price)
+            })
+
+        data = {
+            "invoice_number": invoice.invoice_number,
+            "invoice_date": localtime(invoice.created_at).strftime("%Y-%m-%d"),
+            "order_id": order.id,
+            "order_date": localtime(order.ordered_at).strftime("%Y-%m-%d"),
+            "status": order.status,
+            "is_paid": order.is_paid,
+            "customer": {
+                "name": order.shipping_full_name,
+                "phone": order.shipping_phone,
+                "address": f"{order.shipping_address_line1}, {order.shipping_street}, {order.shipping_district}, {order.shipping_state} - {order.shipping_pin_code}"
+            },
+            "payment": {
+                "transaction_id": payment.transaction_id if payment else None,
+                "method": payment.method if payment else None,
+                "paid_on": localtime(payment.created_at).strftime("%Y-%m-%d %H:%M:%S") if payment else None
+            },
+            "products": products,
+            "summary": {
+                "subtotal": float(order.total_amount),
+                "shipping": float(order.shipping_charge),
+                "discount": float(order.discount),
+                "total": float(order.final_amount)
+            }
+            # "pdf_url": invoice.pdf_file.url if invoice.pdf_file else None
+        }
+        # print(data)
+        return Response(data, status=status.HTTP_200_OK)
+
+
+
+
+class OrderTrackingAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        try:
+            tracking = order.tracking  # OneToOne relation, use reverse
+        except OrderTracking.DoesNotExist:
+            return Response({"error": "Tracking details not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        data = {
+            "order_id": order.id,
+            "tracking_number": tracking.tracking_number,
+            "carrier": tracking.carrier,
+            "status": tracking.status,
+            "estimated_delivery": tracking.estimated_delivery.strftime('%Y-%m-%d') if tracking.estimated_delivery else None,
+            "updated_at": localtime(tracking.updated_at).strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        return Response(data, status=status.HTTP_200_OK)

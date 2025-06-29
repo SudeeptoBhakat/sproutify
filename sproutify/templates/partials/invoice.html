@@ -1,0 +1,362 @@
+  <!-- <div id="invoiceContent" style="display: none;">
+  <h1>Invoice #<span id="invNumber"></span></h1>
+  <p><strong>Date:</strong> <span id="invDate"></span></p>
+  <p><strong>Customer:</strong> <span id="invCustomer"></span></p>
+  <p><strong>Phone:</strong> <span id="invPhone"></span></p>
+  <p><strong>Address:</strong> <span id="invAddress"></span></p>
+
+  <hr>
+
+  <table border="1" cellpadding="10" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="invProducts"></tbody>
+  </table>
+
+  <hr>
+
+  <p><strong>Subtotal:</strong> ₹<span id="invSubtotal"></span></p>
+  <p><strong>Shipping:</strong> ₹<span id="invShipping"></span></p>
+  <p><strong>Discount:</strong> ₹<span id="invDiscount"></span></p>
+  <h3>Total: ₹<span id="invTotal"></span></h3>
+</div> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoice - INV-20250629-8</title>
+  <style>
+    :root {
+      --green: #2f855a;
+      --light-green: #e6f4ea;
+      --gray: #718096;
+      --light-gray: #f7fafc;
+      --dark: #1a202c;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: var(--light-gray);
+      color: var(--dark);
+      margin: 0;
+      /* padding: 20px; */
+    }
+
+    .invoice-container {
+      background: white;
+      max-width: 900px;
+      margin: auto;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .invoice-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--light-green);
+      padding-bottom: 20px;
+    }
+
+    .invoice-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .invoice-logo img {
+      height: 60px;
+      margin-right: 15px;
+    }
+
+    .invoice-title {
+      font-size: 28px;
+      color: var(--green);
+    }
+
+    .invoice-details {
+      margin: 30px 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .details-box {
+      flex: 1;
+      min-width: 250px;
+      background: var(--light-green);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .details-box h4 {
+      margin: 0 0 10px;
+      color: var(--green);
+    }
+
+    .details-box p {
+      margin: 6px 0;
+      font-size: 14px;
+      color: var(--gray);
+    }
+
+    .products {
+      margin-top: 30px;
+    }
+
+    .products table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .products th, .products td {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    .products th {
+      background: var(--light-green);
+      color: var(--green);
+    }
+
+    .product-img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    .summary {
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .summary table {
+      width: 300px;
+      float: right;
+    }
+
+    .summary td {
+      padding: 8px;
+      color: var(--dark);
+    }
+
+    .summary .total {
+      font-weight: bold;
+      border-top: 2px solid var(--green);
+    }
+
+    .footer {
+      margin-top: 60px;
+      text-align: center;
+      color: var(--gray);
+      font-size: 13px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .invoice-container {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div id="invoiceContent" style="display: none;">
+  <div class="invoice-container" id="invoice">
+    <div class="invoice-header">
+      <div class="invoice-logo">
+        <img src="/static/logo-green.png" alt="Sproutify Logo" />
+        <div class="invoice-title">Sproutify Invoice</div>
+      </div>
+      <div>
+        <strong>Invoice No:</strong> <span id="invNumber">INV-20250629-8</span><br />
+        <strong>Date:</strong> <span id="invDate">2025-06-29</span>
+      </div>
+    </div>
+
+    <div class="invoice-details">
+      <div class="details-box">
+        <h4>Billing To:</h4>
+        <p><strong>Name:</strong> <span id="invCustomer">Sudeepta Bhakat</span></p>
+        <p><strong>Phone:</strong> <span id="invPhone">09733248165</span></p>
+        <p><strong>Address:</strong><br />
+          <span id="invAddress">Dr. B.B Banerjee Road, School Para,<br/>
+          School para, Paschim Burdhaman,<br/>
+          West Bengal - 713347</span>
+        </p>
+      </div>
+
+      <div class="details-box">
+        <h4>Order Info:</h4>
+        <p><strong>Order ID:</strong> <span id="invOrderId">#8</span></p>
+        <p><strong>Status:</strong> <span id="invOrderStatus">Processing</span></p>
+        <p><strong>Paid:</strong> <span id="invPaid">✅ Yes</span></p>
+        <p><strong>Order Date:</strong> <span id="invOrderDate">2025-06-29</span></p>
+      </div>
+
+      <div class="details-box">
+        <h4>Payment:</h4>
+        <p><strong>Transaction ID:</strong><br/> <span id="invTransactionId">order_QmzydUk86kxVSE</span></p>
+        <p><strong>Method:</strong> <span id="invPaymentMethod">Online</span></p>
+        <p><strong>Paid On:</strong><br/> <span id="invPaidOn">2025-06-29 11:40:38</span></p>
+      </div>
+    </div>
+
+    <div class="products">
+      <h3>Products</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price (₹)</th>
+            <th>Total (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="invProducts">
+          <!-- Dynamically injected via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="summary">
+      <table>
+        <tr>
+          <td>Subtotal:</td>
+          <td>₹<span id="invSubtotal">276.00</span></td>
+        </tr>
+        <tr>
+          <td>Shipping:</td>
+          <td>₹<span id="invShipping">0.00</span></td>
+        </tr>
+        <tr>
+          <td>Discount:</td>
+          <td>₹<span id="invDiscount">0.00</span></td>
+        </tr>
+        <tr class="total">
+          <td>Total Paid:</td>
+          <td>₹<span id="invTotal">276.00</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      Thank you for shopping with 🌱 Sproutify!<br/>
+      Let's grow happiness together. Visit us again at <a href="https://sproutify.in">sproutify.in</a>
+    </div>
+  </div>
+</div>
+
+<!-- <div id="invoiceContent" style="display: none;">
+  <div class="invoice-container" id="invoice">
+    <div class="invoice-header">
+      <div class="invoice-logo">
+        <img src="/static/logo-green.png" alt="Sproutify Logo" />
+        <div class="invoice-title">Sproutify Invoice</div>
+      </div>
+      <div>
+        <strong>Invoice No:</strong> INV-20250629-8<br/>
+        <strong>Date:</strong> 2025-06-29
+      </div>
+    </div>
+
+    <div class="invoice-details">
+      <div class="details-box">
+        <h4>Billing To:</h4>
+        <p><strong>Name:</strong> Sudeepta Bhakat</p>
+        <p><strong>Phone:</strong> 09733248165</p>
+        <p><strong>Address:</strong><br/>Dr. B.B Banerjee Road, School Para,<br/>School para, Paschim Burdhaman,<br/>West Bengal - 713347</p>
+      </div>
+
+      <div class="details-box">
+        <h4>Order Info:</h4>
+        <p><strong>Order ID:</strong> #8</p>
+        <p><strong>Status:</strong> Processing</p>
+        <p><strong>Paid:</strong> ✅ Yes</p>
+        <p><strong>Order Date:</strong> 2025-06-29</p>
+      </div>
+
+      <div class="details-box">
+        <h4>Payment:</h4>
+        <p><strong>Transaction ID:</strong><br/>order_QmzydUk86kxVSE</p>
+        <p><strong>Method:</strong> Online</p>
+        <p><strong>Paid On:</strong><br/>2025-06-29 11:40:38</p>
+      </div>
+    </div>
+
+    <div class="products">
+      <h3>Products</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price (₹)</th>
+            <th>Total (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><img src="/media/products/Guava-20250629002059.jpeg" class="product-img" /> Guava</td>
+            <td>2</td>
+            <td>178</td>
+            <td>356</td>
+          </tr>
+          <tr>
+            <td><img src="/media/products/Pots-20250629002214.jpeg" class="product-img" /> Pots</td>
+            <td>2</td>
+            <td>98</td>
+            <td>196</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="summary">
+      <table>
+        <tr>
+          <td>Subtotal:</td>
+          <td>₹276.00</td>
+        </tr>
+        <tr>
+          <td>Shipping:</td>
+          <td>₹0.00</td>
+        </tr>
+        <tr>
+          <td>Discount:</td>
+          <td>₹0.00</td>
+        </tr>
+        <tr class="total">
+          <td>Total Paid:</td>
+          <td>₹276.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      Thank you for shopping with 🌱 Sproutify!<br/>
+      Let's grow happiness together. Visit us again at <a href="https://sproutify.in">sproutify.in</a>
+    </div>
+  </div>
+</div> -->
+</body>
+</html>

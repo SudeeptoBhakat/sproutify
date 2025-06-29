@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Order Confirmed - Sproutify</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/orders.css' %}">
+</head>
+
+<body>
+  <!-- LOGIN POPUP -->
+  {% include 'partials/login_popup.html' %}
+  <!-- REGISTER POPUP -->
+  {% include 'partials/register_popup.html' %}
+
+  <!-- preloader -->
+  {% include 'partials/preloader.html' %}
+
+  <!-- Whatsapp logo -->
+  {% include "partials/whatsapp.html" %}
+
+  <!-- navbar -->
+  {% include 'partials/navbar.html' %}
+
+  <!-- Popup Drawer for tracking order -->
+  {% include 'partials/order_tracking.html' %}
+
+  <div class="orders-container" id="ordersContainer">
+    <!-- Orders will be injected dynamically -->
+  </div>
+
+  {% include 'partials/footer.html' %}
+
+  {% include 'partials/invoice.html' %}
+  {% include 'partials/scripts.html' %}
+  {% include 'partials/toast.html' %}
+  <!-- ✅ Master event listeners -->
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("click", handleAddToCart);
+      document.addEventListener("click", handleCartView);
+      // loadProducts();
+      initLogin();
+      initRegistration();
+      initSearch();
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Order Details -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchOrders();
+    });
+
+    async function fetchOrders() {
+      const token = localStorage.getItem("authToken");
+      if (!token) return alert("Please login to view your orders.");
+
+      try {
+        const res = await fetch("/api/orders/", {
+          headers: {
+            Authorization: `Token ${token}`
+          }
+        });
+        const orders = await res.json();
+        renderOrders(orders);
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        document.getElementById("ordersContainer").innerHTML =
+          "<p>Failed to load orders.</p>";
+      }
+    }
+
+    // Trigger fetch immediately
+    fetchOrders();
+
+
+    function renderOrders(orders) {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = "";
+
+      orders.forEach((order, idx) => {
+        const isOpen = idx === 0 ? "open" : "";
+        const isActive = idx === 0 ? "active" : "";
+
+        const productList = order.products.length
+          ? order.products
+            .map(
+              (item) => `
+        <a href="/product/${item.product_id}/">
+          <li>
+            <img src="${item.image}" alt="${item.name}">
+            ${item.name} × ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}
+          </li>
+        </a>`
+            )
+            .join("")
+          : "<li>No products in this order</li>";
+
+        const actionButtons = order.is_paid
+          ? `
+        <button class="btn" onclick="downloadInvoice(${order.id})">📄 Download Invoice</button>
+        <button class="btn" onclick="fetchTracking(${order.id})">📦 Track Order</button>
+      `
+          : `
+        <button class="btn" onclick="retryOrder(${order.id})">🛒 Order Now</button>
+      `;
+
+        const paymentInfo = order.is_paid
+          ? `<p><strong>Payment ID:</strong> ${order.paymentId}</p>`
+          : "";
+
+        const thankYouNote = order.is_paid
+          ? `<div class="thank-you">✅ Thank you for your purchase 🌿</div>`
+          : "";
+
+        container.innerHTML += `
+      <div class="accordion-item">
+        <button class="accordion-header ${isActive}" onclick="toggleAccordion(this)">
+          📦 Order #${order.id}
+          <span class="badge ${order.status}">${order.status}</span>
+          <span class="accordion-icon">+</span>
+        </button>
+        <div class="accordion-content ${isOpen}">
+          ${thankYouNote}
+          <p><strong>Date:</strong> ${order.date}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
+          <p><strong>Total Paid:</strong> ₹${order.total.toFixed(2)}</p>
+          ${paymentInfo}
+          <div class="section-title">Customer Info</div>
+          <p><strong>Name:</strong> ${order.customer.name}</p>
+          <p><strong>Phone:</strong> ${order.customer.phone}</p>
+          <p><strong>Address:</strong> ${order.customer.address}</p>
+          <div class="section-title">Items</div>
+          <ul class="product-list">${productList}</ul>
+          <div class="action-buttons">${actionButtons}</div>
+        </div>
+      </div>
+    `;
+      });
+    }
+
+    function toggleAccordion(button) {
+      const headers = document.querySelectorAll(".accordion-header");
+      const contents = document.querySelectorAll(".accordion-content");
+
+      headers.forEach((h) => h.classList.remove("active"));
+      contents.forEach((c) => c.classList.remove("open"));
+
+      button.classList.add("active");
+      const content = button.nextElementSibling;
+      content.classList.add("open");
+
+      const icon = button.querySelector(".accordion-icon");
+      icon.innerText = icon.innerText === "+" ? "−" : "+";
+    }
+
+
+    function formatDate(isoDate) {
+      const date = new Date(isoDate);
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+
+    function retryOrder(orderId) {
+      window.location.href = `/order/summary/?order_id=${orderId}`;
+    }
+  </script>
+
+  <!-- Tracking Details and functions -->
+  <script>
+    const TRACKING_STAGES = [
+      "Order Placed",
+      "Processed",
+      "Shipped",
+      "Out for Delivery",
+      "Arrived"
+    ];
+
+    async function fetchTracking(orderId) {
+      const token = localStorage.getItem("authToken");
+
+      try {
+        const res = await fetch(`/api/tracking/${orderId}/`, {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          // Update tracking info
+          document.getElementById("orderId").innerText = `#${data.order_id}`;
+          document.getElementById("trackingCode").innerText = data.tracking_number || "N/A";
+          document.getElementById("arrivalDate").innerText = data.estimated_delivery || "TBD";
+
+          // Update steps dynamically
+          updateTrackingSteps(data.status);
+
+          // Open drawer
+          openDrawer();
+        } else {
+          alert("Tracking not found.");
+        }
+      } catch (err) {
+        console.error("Tracking fetch error:", err);
+      }
+    }
+
+    function updateTrackingSteps(status) {
+      const stepElements = document.querySelectorAll(".step");
+      const currentIndex = TRACKING_STAGES.indexOf(status);
+
+      // Update tracker bar
+      const progressWidth = (currentIndex) / (TRACKING_STAGES.length - 1) * 100;
+      document.getElementById("progressBar").style.width = `${progressWidth}%`;
+
+      // Update individual steps
+      stepElements.forEach((step, index) => {
+        const circle = step.querySelector(".step-circle");
+        if (index <= currentIndex) {
+          step.classList.add("active");
+          circle.textContent = "✔";
+        } else {
+          step.classList.remove("active");
+          circle.textContent = "•";
+        }
+      });
+    }
+
+    function openDrawer() {
+      const overlay = document.getElementById("drawerOverlay");
+      const drawer = overlay.querySelector(".drawer");
+
+      overlay.style.display = "flex";
+      drawer.style.animation = "slideUp 0.3s ease forwards";
+    }
+
+    function closeDrawer() {
+      const overlay = document.getElementById("drawerOverlay");
+      const drawer = overlay.querySelector(".drawer");
+
+      drawer.style.animation = "slideDown 0.3s ease forwards";
+
+      setTimeout(() => {
+        overlay.style.display = "none";
+        drawer.style.animation = "";
+      }, 300);
+    }
+  </script>
+
+
+  <script>
+    async function downloadInvoice(orderId) {
+      const token = localStorage.getItem("authToken");
+      if (!token) return alert("Please login first.");
+
+      try {
+        const res = await fetch(`/api/invoice/${orderId}/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+
+        const data = await res.json();
+        // console.log(data)
+        // Inject invoice data into hidden HTML
+        document.getElementById("invNumber").innerText = data.invoice_number || orderId;
+        document.getElementById("invDate").innerText = data.date;
+        document.getElementById("invCustomer").innerText = data.customer.name;
+        document.getElementById("invPhone").innerText = data.customer.phone;
+        document.getElementById("invAddress").innerText = data.customer.address;
+        document.getElementById("invSubtotal").innerText = data.summary.subtotal.toFixed(2);;
+        document.getElementById("invShipping").innerText = data.summary.shipping.toFixed(2);;
+        document.getElementById("invDiscount").innerText = data.summary.discount.toFixed(2);;
+        document.getElementById("invTotal").innerText = data.summary.total.toFixed(2);
+
+        const tbody = document.getElementById("invProducts");
+        tbody.innerHTML = "";
+        data.products.forEach((p) => {
+          tbody.innerHTML += `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.quantity}</td>
+          <td>₹${p.price.toFixed(2)}</td>
+          <td>₹${(p.price * p.quantity).toFixed(2)}</td>
+        </tr>`;
+        });
+
+        // Make invoice visible temporarily
+        const invoice = document.getElementById("invoiceContent");
+        invoice.style.display = "block";
+
+        // Generate PDF using html2canvas + jsPDF
+        const canvas = await html2canvas(invoice, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new window.jspdf.jsPDF();
+        const width = pdf.internal.pageSize.getWidth();
+        const height = (canvas.height * width) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, width, height);
+        pdf.save(`Invoice_${data.invoice_number || orderId}.pdf`);
+
+        // Hide the invoice content again
+        invoice.style.display = "none";
+      } catch (err) {
+        console.error("Failed to generate invoice:", err);
+        alert("Error generating invoice. Try again later.");
+      }
+    }
+
+  </script>
+
+</body>
+
+</html>

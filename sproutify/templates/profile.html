@@ -437,7 +437,7 @@
   // Render Orders with accordion and action buttons
   function renderOrders(orders) {
     const container = document.querySelector(".orders");
-    if (!container || !Array.isArray(orders)) return;
+    if (!container) return;
 
     if (orders.length === 0) {
       container.innerHTML = "<li>No orders found.</li>";
@@ -522,13 +522,14 @@
     if (!token) return alert("Please login to view orders.");
 
     try {
-      const res = await fetch("/orders/", {
+      const res = await fetch("/api/user-orders-items/", {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`
         }
       });
       const data = await res.json();
+      // console.log(data);
       renderOrders(data);
     } catch (err) {
       console.error("Error fetching orders:", err);

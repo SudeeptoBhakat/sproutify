@@ -335,7 +335,7 @@
                             const verifyData = await verifyRes.json();
                             if (verifyRes.ok) {
                                 alert("✅ Payment Successful!");
-                                window.location.href = "/order-success/";
+                                window.location.href = "/orders/";
                             } else {
                                 alert("❌ Payment verification failed: " + (verifyData.error || "Unknown error"));
                             }
